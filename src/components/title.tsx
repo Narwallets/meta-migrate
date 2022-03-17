@@ -12,25 +12,29 @@ export default function TitleComponent(props: {
             item
             xs={1}
             sx={{
-                display: "flex",
-                alignItems: "center"
+                // display: "flex",
+                alignItems: "center",
+                fontSize: "2rem",
+                fontWeight: 700
             }}
         >
             {props.step !== undefined ? (
-                <h1
+                <span
                     style={{
                         color: theme.palette.primary.main,
-                        position: "absolute",
-                        transform: "translateX(calc(-100% - 24px))",
-                        verticalAlign: "baseline"
+                        // position: "absolute",
+                        // transform: "translateX(calc(-100% - 24px))",
+                        verticalAlign: "baseline",
+                        marginRight: ".5em"
                     }}
+                    
                 >
                     {`Step ${props.step}:`}
-                </h1>
+                </span>
             ) : (
                 <></>
             )}
-            <h1>{props.title}</h1>
+            <span>{props.title}</span>
         </Grid>
     )
 }

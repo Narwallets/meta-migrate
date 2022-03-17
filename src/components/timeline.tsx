@@ -15,11 +15,13 @@ function getColor(page: number): "grey" | "primary" | "success" {
     return "grey"
 }
 
+
 export default function TimelineComponent() {
     return (
         <Timeline
+            className="timeline"
             sx={{
-                flexBasis: "200px",
+                flexBasis: "12.5rem",
                 alignItems: "end",
                 "& > .MuiTimelineItem-root::before": {
                     flex: 0
@@ -30,38 +32,38 @@ export default function TimelineComponent() {
             }}
             position="left"
         >
-            <TimelineItem onClick={() => jumpTo(0)}>
-                <TimelineSeparator>
-                    <TimelineDot color={getColor(0)} />
-                    <TimelineConnector />
+            <TimelineItem className="timeline-item" onClick={() => jumpTo(0)}>
+                <TimelineSeparator className="timeline-item-separator">
+                    <TimelineDot className="timeline-item-dot" color={getColor(0)} />
+                    <TimelineConnector className="timeline-item-conector"/>
                 </TimelineSeparator>
-                <TimelineContent>OLD POSITION</TimelineContent>
+                <TimelineContent className="timeline-item-content">OLD POSITION</TimelineContent>
             </TimelineItem>
-            <TimelineItem onClick={() => jumpTo(1)}>
-                <TimelineSeparator>
-                    <TimelineDot color={getColor(1)} />
-                    <TimelineConnector />
+            <TimelineItem className="timeline-item" onClick={() => jumpTo(1)}>
+                <TimelineSeparator className="timeline-item-separator">
+                    <TimelineDot className="timeline-item-dot" color={getColor(1)} />
+                    <TimelineConnector className="timeline-item-conector"/>
                 </TimelineSeparator>
-                <TimelineContent>CONVERT</TimelineContent>
+                <TimelineContent className="timeline-item-content">CONVERT</TimelineContent>
             </TimelineItem>
-            <TimelineItem onClick={() => jumpTo(2)}>
-                <TimelineSeparator>
-                    <TimelineDot color={getColor(2)} />
-                    <TimelineConnector />
+            <TimelineItem className="timeline-item" onClick={() => jumpTo(2)}>
+                <TimelineSeparator className="timeline-item-separator">
+                    <TimelineDot className="timeline-item-dot" color={getColor(2)} />
+                    <TimelineConnector className="timeline-item-conector"/>
                 </TimelineSeparator>
-                <TimelineContent>NEW POSITION</TimelineContent>
+                <TimelineContent className="timeline-item-content">NEW POSITION</TimelineContent>
             </TimelineItem>
-            <TimelineItem onClick={() => jumpTo(3)}>
-                <TimelineSeparator>
-                    <TimelineDot color={getColor(3)} />
+            <TimelineItem className="timeline-item" onClick={() => jumpTo(3)}>
+                <TimelineSeparator className="timeline-item-separator">
+                    <TimelineDot className="timeline-item-dot" color={getColor(3)} />
                 </TimelineSeparator>
-                <TimelineContent>PROFIT</TimelineContent>
+                <TimelineContent className="timeline-item-content">PROFIT</TimelineContent>
             </TimelineItem>
-            <TimelineItem onClick={() => jumpTo(4)}>
-                <TimelineSeparator>
-                    <TimelineDot color={getColor(4)} />
+            <TimelineItem className="timeline-item" onClick={() => jumpTo(4)}>
+                <TimelineSeparator className="timeline-item-separator">
+                    <TimelineDot className="timeline-item-dot" color={getColor(4)} />
                 </TimelineSeparator>
-                <TimelineContent>LOCATE MY FUNDS</TimelineContent>
+                <TimelineContent className="timeline-item-content">LOCATE MY FUNDS</TimelineContent>
             </TimelineItem>
         </Timeline>
     )

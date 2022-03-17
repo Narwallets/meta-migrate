@@ -4,9 +4,9 @@ import RecipesLogo from "../public/logo.svg"
 export default function Header() {
     const theme = useTheme() as any
     return (
-        <Grid sx={{ margin: 4 }}>
+        <Grid className="header" sx={{ margin: 4 }}>
             <header>
-                <img src={RecipesLogo} alt=""></img>
+                <img className="logo" src={RecipesLogo} alt=""></img>
                 <Box
                     className="back"
                     component="span"

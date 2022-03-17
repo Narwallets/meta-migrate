@@ -98,32 +98,32 @@ const setInputErrors = (
 
 const Description = (props: { children: any }) => (
     <div
-        style={{
-            display: "flex",
-            flexFlow: "row wrap",
-            alignItems: "baseline",
-            whiteSpace: "break-spaces"
-        }}
+    // style={{
+    //     display: "flex",
+    //     flexFlow: "row wrap",
+    //     alignItems: "baseline",
+    //     whiteSpace: "break-spaces"
+    // }}
     >
         {props.children}
     </div>
 )
 
-const Break = () => <div style={{ width: "100%" }} />
+const Break = () => <div /*style={{ width: "100%" }}*/ />
 
-const Seperate = () => <div style={{ width: "100%", height: "0.5em" }} />
+const Seperate = () => <div /*style={{ width: "100%", height: "0.5em" }}*/ />
 
 const Warning = (props: { children: any }) => {
     const theme = useTheme() as any
     return (
         <span
-            style={{
-                display: "flex",
-                flexFlow: "row wrap",
-                color: theme.palette.warning.main,
-                fontWeight: "bold",
-                marginTop: "8px"
-            }}
+        // style={{
+        //     display: "flex",
+        //     flexFlow: "row wrap",
+        //     color: theme.palette.warning.main,
+        //     fontWeight: "bold",
+        //     marginTop: "8px"
+        // }}
         >
             <Icon>warning_amber</Icon> {props.children}
         </span>
@@ -134,10 +134,10 @@ const Purple = (props: { children: any }) => {
     const theme = useTheme() as any
     return (
         <span
-            style={{
-                color: theme.palette.primary.main,
-                fontWeight: "bold"
-            }}
+        style={{
+            color: theme.palette.primary.main,
+            fontWeight: "bold"
+        }}
         >
             {props.children}
         </span>
@@ -147,12 +147,12 @@ const Purple = (props: { children: any }) => {
 const Note = (props: { children: any }) => {
     return (
         <span
-            style={{
-                fontWeight: "lighter",
-                fontSize: "small",
-                opacity: 0.5,
-                paddingTop: "8px"
-            }}
+        style={{
+            fontWeight: "lighter",
+            fontSize: "small",
+            opacity: 0.5,
+            paddingTop: "0.5rem"
+        }}
         >
             {props.children}
         </span>
@@ -174,13 +174,14 @@ const Input = (props: {
     return (
         <TextField
             sx={{
+                width: .45,
                 mx: 1,
-                flex: 2,
-                flexBasis: 0
+                // flex: 2,
+                // flexBasis: 0
             }}
             label={props.label}
             variant="outlined"
-            margin="normal"
+            // margin="normal"
             size="small"
             type={props.type}
             InputProps={{
@@ -330,6 +331,11 @@ function getContent(page: number): ReactNode | null {
                                 <Note>Execution might take a while.</Note>
                             </Description>
                         }
+                        
+                    />
+                    <NavButtonComponent
+                        next 
+                        status
                         completed={
                             window.REFRESHER[1] ??
                             (() => {
@@ -368,7 +374,6 @@ function getContent(page: number): ReactNode | null {
                             )
                         }}
                     />
-                    <NavButtonComponent next />
                 </>
             )
 
@@ -392,84 +397,92 @@ function getContent(page: number): ReactNode | null {
                                     {""} $NEAR in your wallet.
                                 </span>
                                 <Break />
-                                <Input
-                                    id={0}
-                                    label="amount"
-                                    unit="NEAR"
-                                    type="number"
-                                    pattern="^\d+(\.\d{0,24})?$"
-                                    assert={[
-                                        {
-                                            test: (value: string) =>
-                                                window.minDepositAmount !==
-                                                    undefined &&
-                                                BigInt(
-                                                    utils.format.parseNearAmount(
-                                                        value
-                                                    ) ?? "0"
-                                                ) <
+                                <div className="input-container">
+                                    <Input
+                                        id={0}
+                                        label="amount"
+                                        unit="NEAR"
+                                        type="number"
+                                        pattern="^\d+(\.\d{0,24})?$"
+                                        assert={[
+                                            {
+                                                test: (value: string) =>
+                                                    window.minDepositAmount !==
+                                                        undefined &&
                                                     BigInt(
-                                                        window.minDepositAmount
-                                                    ),
-                                            msg: `Staking with MetaPool requires a minimum deposit of ${yton(
-                                                window.minDepositAmount,
-                                                2
-                                            )} $NEAR.`
-                                        },
-                                        {
-                                            test: (value: string) =>
-                                                window.nativeNEARBalance !==
-                                                    undefined &&
-                                                BigInt(
-                                                    utils.format.parseNearAmount(
-                                                        value
-                                                    ) ?? "0"
-                                                ) >
+                                                        utils.format.parseNearAmount(
+                                                            value
+                                                        ) ?? "0"
+                                                    ) <
+                                                        BigInt(
+                                                            window.minDepositAmount
+                                                        ),
+                                                msg: `Staking with MetaPool requires a minimum deposit of ${yton(
+                                                    window.minDepositAmount,
+                                                    2
+                                                )} $NEAR.`
+                                            },
+                                            {
+                                                test: (value: string) =>
+                                                    window.nativeNEARBalance !==
+                                                        undefined &&
                                                     BigInt(
-                                                        window.nativeNEARBalance
-                                                    ),
-                                            msg: `Insufficient funds. You only have ${utils.format.formatNearAmount(
-                                                window.nativeNEARBalance
-                                            )} $NEAR in your wallet.`
+                                                        utils.format.parseNearAmount(
+                                                            value
+                                                        ) ?? "0"
+                                                    ) >
+                                                        BigInt(
+                                                            window.nativeNEARBalance
+                                                        ),
+                                                msg: `Insufficient funds. You only have ${utils.format.formatNearAmount(
+                                                    window.nativeNEARBalance
+                                                )} $NEAR in your wallet.`
+                                            }
+                                        ]}
+                                        default={
+                                            inputValuesUnmatched[0] ??
+                                            utils.format.formatNearAmount(
+                                                localStorage.getItem(
+                                                    "wNEARminAmountOut"
+                                                ) ?? "0"
+                                            )
                                         }
-                                    ]}
-                                    default={
-                                        inputValuesUnmatched[0] ??
-                                        utils.format.formatNearAmount(
-                                            localStorage.getItem(
-                                                "wNEARminAmountOut"
-                                            ) ?? "0"
-                                        )
-                                    }
-                                />
-                                {""} {"\u2248"} {""}
-                                <span>
-                                    <Purple>
-                                        {window.stNEARPrice
-                                            ? parseFloat(
-                                                  (
-                                                      Number(
-                                                          BigInt(
-                                                              inputErrors[0]
-                                                                  ? "0"
-                                                                  : (utils.format.parseNearAmount(
-                                                                        inputValues[0] ??
-                                                                            "0"
-                                                                    ) as string) +
-                                                                        "0000"
-                                                          ) /
-                                                              BigInt(
-                                                                  window.stNEARPrice
-                                                              )
-                                                      ) / 10000
-                                                  ).toString()
-                                              ).toFixed(5)
-                                            : "..."}
-                                    </Purple>
-                                    {""} $stNEAR.
-                                </span>
+                                    />
+                                    
+                                    <span className="input-container-equals">
+                                        {""} {"\u2248"} {""}
+                                        <Purple>
+                                            {window.stNEARPrice
+                                                ? parseFloat(
+                                                    (
+                                                        Number(
+                                                            BigInt(
+                                                                inputErrors[0]
+                                                                    ? "0"
+                                                                    : (utils.format.parseNearAmount(
+                                                                            inputValues[0] ??
+                                                                                "0"
+                                                                        ) as string) +
+                                                                            "0000"
+                                                            ) /
+                                                                BigInt(
+                                                                    window.stNEARPrice
+                                                                )
+                                                        ) / 10000
+                                                    ).toString()
+                                                ).toFixed(5)
+                                                : "..."}
+                                        </Purple>
+                                        {""} $stNEAR.
+                                    </span>
+                                </div>
                             </Description>
                         }
+                    />
+                    <NavButtonComponent 
+                        next 
+                        back
+                        status
                         completed={
                             window.REFRESHER[2] ??
                             (() => {
@@ -512,8 +525,7 @@ function getContent(page: number): ReactNode | null {
                                 ) as string
                             )
                         }
-                    />
-                    <NavButtonComponent next back />
+                     />
                 </>
             )
 
@@ -595,141 +607,149 @@ function getContent(page: number): ReactNode | null {
                                     {""} $stNEAR.
                                 </span>
                                 <Break />
-                                <Input
-                                    id={1}
-                                    label="amount"
-                                    unit="OCT"
-                                    type="number"
-                                    pattern="^\d+(\.\d{0,18})?$"
-                                    assert={[
-                                        {
-                                            test: (value: string) =>
-                                                window.OCTBalanceOnRef !==
-                                                    undefined &&
-                                                BigInt(
-                                                    utils.format.parseNearAmount(
-                                                        value
-                                                    ) ?? "0"
-                                                ) >
+                                <div className="input-container">
+                                    <Input
+                                        id={1}
+                                        label="amount"
+                                        unit="OCT"
+                                        type="number"
+                                        pattern="^\d+(\.\d{0,18})?$"
+                                        assert={[
+                                            {
+                                                test: (value: string) =>
+                                                    window.OCTBalanceOnRef !==
+                                                        undefined &&
                                                     BigInt(
-                                                        window.OCTBalanceOnRef +
-                                                            "000000"
-                                                    ),
-                                            msg: `Insufficient funds. You only have ${
-                                                window.OCTBalanceOnRef !==
-                                                undefined
-                                                    ? yton(
-                                                          window.OCTBalanceOnRef +
-                                                              "000000"
-                                                      )
-                                                    : "..."
-                                            } $OCT on Ref-finance.`
-                                        }
-                                    ]}
-                                    onChange={(value: string) => {
-                                        if (
-                                            window.newPoolInfo !== undefined &&
-                                            !inputErrors[1]
-                                        ) {
-                                            // https://stackoverflow.com/a/54409977/17894968
-                                            inputValuesUnmatched[2] = (
-                                                parseFloat(value) /
-                                                (Number(
-                                                    (BigInt("10000000000") *
-                                                        BigInt("1000000") *
+                                                        utils.format.parseNearAmount(
+                                                            value
+                                                        ) ?? "0"
+                                                    ) >
                                                         BigInt(
-                                                            window.newPoolInfo
-                                                                .amounts[1]
-                                                        )) /
-                                                        BigInt(
-                                                            window.newPoolInfo
-                                                                .amounts[0]
-                                                        )
-                                                ) /
-                                                    10000000000)
-                                            ).toFixed(5) // TODO: check if final pool is [OCT, stNEAR] or [stNEAR, OCT]
-                                        }
-                                    }}
-                                    default={inputValuesUnmatched[1]}
-                                />
-                                <Icon sx={{ alignSelf: "center" }}>link</Icon>
-                                <Input
-                                    id={2}
-                                    label="amount"
-                                    unit="stNEAR"
-                                    type="number"
-                                    pattern="^\d+(\.\d{0,24})?$"
-                                    assert={[
-                                        {
-                                            test: (value: string) =>
-                                                window.stNEARBalanceOnRef !==
-                                                    undefined &&
-                                                window.stNEARBalance !==
-                                                    undefined &&
-                                                BigInt(
-                                                    utils.format.parseNearAmount(
-                                                        value
-                                                    ) ?? "0"
-                                                ) >
-                                                    BigInt(
-                                                        window.stNEARBalanceOnRef
-                                                    ) +
-                                                        BigInt(
-                                                            window.stNEARBalance
+                                                            window.OCTBalanceOnRef +
+                                                                "000000"
                                                         ),
-                                            msg: `Insufficient funds. You only have ${yton(
-                                                (
-                                                    BigInt(
-                                                        window.stNEARBalanceOnRef ??
-                                                            "0"
-                                                    ) +
-                                                    BigInt(
-                                                        window.stNEARBalance ??
-                                                            "0"
-                                                    )
-                                                ).toString()
-                                            )} stNEAR in total.`
-                                        }
-                                    ]}
-                                    onChange={(value: string) => {
-                                        if (
-                                            window.newPoolInfo !== undefined &&
-                                            !inputErrors[2]
-                                        ) {
-                                            inputValuesUnmatched[1] = (
-                                                (parseFloat(value) *
-                                                    Number(
+                                                msg: `Insufficient funds. You only have ${
+                                                    window.OCTBalanceOnRef !==
+                                                    undefined
+                                                        ? yton(
+                                                            window.OCTBalanceOnRef +
+                                                                "000000"
+                                                        )
+                                                        : "..."
+                                                } $OCT on Ref-finance.`
+                                            }
+                                        ]}
+                                        onChange={(value: string) => {
+                                            if (
+                                                window.newPoolInfo !== undefined &&
+                                                !inputErrors[1]
+                                            ) {
+                                                // https://stackoverflow.com/a/54409977/17894968
+                                                inputValuesUnmatched[2] = (
+                                                    parseFloat(value) /
+                                                    (Number(
                                                         (BigInt("10000000000") *
                                                             BigInt("1000000") *
                                                             BigInt(
-                                                                window
-                                                                    .newPoolInfo
+                                                                window.newPoolInfo
                                                                     .amounts[1]
                                                             )) /
                                                             BigInt(
-                                                                window
-                                                                    .newPoolInfo
+                                                                window.newPoolInfo
                                                                     .amounts[0]
                                                             )
-                                                    )) /
-                                                10000000000
-                                            ).toFixed(5) // TODO: check if final pool is [OCT, stNEAR] or [stNEAR, OCT]
-                                        }
-                                    }}
-                                    default={inputValuesUnmatched[2]}
-                                />
-                                <Break />
-                                {"\u2248"}{" "}
-                                <span>
-                                    <Purple>
-                                        {window.newPoolInfo
-                                            ? yton(window.lpSharesToStake)
-                                            : "..."}
-                                    </Purple>
-                                    {""} LP shares. {""}
-                                </span>
+                                                    ) /
+                                                        10000000000)
+                                                ).toFixed(5) // TODO: check if final pool is [OCT, stNEAR] or [stNEAR, OCT]
+                                            }
+                                        }}
+                                        default={inputValuesUnmatched[1]}
+                                    />
+                                    <Icon sx={{ alignSelf: "center", lineHeight: "1.5em" }}>link</Icon>
+                                    <Input
+                                        id={2}
+                                        label="amount"
+                                        unit="stNEAR"
+                                        type="number"
+                                        pattern="^\d+(\.\d{0,24})?$"
+                                        assert={[
+                                            {
+                                                test: (value: string) =>
+                                                    window.stNEARBalanceOnRef !==
+                                                        undefined &&
+                                                    window.stNEARBalance !==
+                                                        undefined &&
+                                                    BigInt(
+                                                        utils.format.parseNearAmount(
+                                                            value
+                                                        ) ?? "0"
+                                                    ) >
+                                                        BigInt(
+                                                            window.stNEARBalanceOnRef
+                                                        ) +
+                                                            BigInt(
+                                                                window.stNEARBalance
+                                                            ),
+                                                msg: `Insufficient funds. You only have ${yton(
+                                                    (
+                                                        BigInt(
+                                                            window.stNEARBalanceOnRef ??
+                                                                "0"
+                                                        ) +
+                                                        BigInt(
+                                                            window.stNEARBalance ??
+                                                                "0"
+                                                        )
+                                                    ).toString()
+                                                )} stNEAR in total.`
+                                            }
+                                        ]}
+                                        onChange={(value: string) => {
+                                            if (
+                                                window.newPoolInfo !== undefined &&
+                                                !inputErrors[2]
+                                            ) {
+                                                inputValuesUnmatched[1] = (
+                                                    (parseFloat(value) *
+                                                        Number(
+                                                            (BigInt("10000000000") *
+                                                                BigInt("1000000") *
+                                                                BigInt(
+                                                                    window
+                                                                        .newPoolInfo
+                                                                        .amounts[1]
+                                                                )) /
+                                                                BigInt(
+                                                                    window
+                                                                        .newPoolInfo
+                                                                        .amounts[0]
+                                                                )
+                                                        )) /
+                                                    10000000000
+                                                ).toFixed(5) // TODO: check if final pool is [OCT, stNEAR] or [stNEAR, OCT]
+                                            }
+                                        }}
+                                        default={inputValuesUnmatched[2]}
+                                    />
+                                    <Break />
+                                    {"\u2248"}{" "}
+                                    <span>
+                                        <Purple>
+                                            {window.newPoolInfo
+                                                ? yton(window.lpSharesToStake)
+                                                : "..."}
+                                        </Purple>
+                                        {""} LP shares. {""}
+                                    </span>
+                                </div>
                             </Description>
                         }
+                        
+                    />
+                    <NavButtonComponent 
+                        next 
+                        back 
+                        status
                         denied={
                             inputErrors[1] ||
                             inputErrors[2] ||
@@ -785,7 +805,6 @@ function getContent(page: number): ReactNode | null {
                             )
                         }}
                     />
-                    <NavButtonComponent next back />
                 </>
             )
 
@@ -1012,9 +1031,9 @@ export default function PageComponent(props: { page: number }) {
         <Grid
             container
             sx={{
-                width: 1,
-                height: 1,
-                p: 4
+                width: .9,
+                height: .85,
+                m:"auto",
             }}
             direction="column"
             justifyContent="space-evenly"

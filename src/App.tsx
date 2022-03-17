@@ -74,13 +74,12 @@ export default function App() {
             <Header />
             <SummaryBox page={page} />
             <Grid
-                container
-                sx={{
-                    width: 1,
-                    height: 1
-                }}
-                className="timeline-container"
-                direction="row"
+                // container
+                // sx={{
+                //     width: 1,
+                //     height: 1
+                // }}
+                className="main-container"
                 justifyContent="center"
                 wrap="nowrap"
                 marginTop="2%"
@@ -89,26 +88,33 @@ export default function App() {
                 <Grid
                     item
                     container
+                    className="nav-container"
                     direction="column"
                     alignItems="flex-end"
                     wrap="nowrap"
                     xs={2}
+                    sx={{
+                        ml:"2em"
+                    }}
+                    
                 >
                     <WalletComponent />
                     <TimelineComponent />
                 </Grid>
                 <Grid
                     item
+                    className="secondary-container"
                     sx={{
                         height: 0.5,
-                        minHeight: "400px",
-                        flexBasis: "800px",
+                        minHeight: "25rem",
+                        flexBasis: "50rem",
                         flexShrink: 0,
                         width: 0.5
                     }}
                 >
                     <PaperComponent />
                 </Grid>
+                {/* Empty item for design purposes */}
                 <Grid item xs={2} />
             </Grid>
         </ThemeProvider>
