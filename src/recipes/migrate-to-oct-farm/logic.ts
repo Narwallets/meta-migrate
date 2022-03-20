@@ -28,9 +28,7 @@ export default class Logic extends BaseLogic {
     lpSharesToStake?: string
 
     stepTwoAction(amount: string): void {
-        this.passToWallet([
-            this.nearToStnear(amount)
-        ])
+        this.passToWallet([this.nearToStnear(amount)])
     }
 
     getOldFarmingStake(): Promise<string> {

@@ -20,7 +20,7 @@ export default function TimelineComponent(props: { steps: string[] }) {
         <Timeline
             sx={{
                 flexBasis: "200px",
-                alignItems: "end",
+                alignItems: "flex-end",
                 "& > .MuiTimelineItem-root::before": {
                     flex: 0
                 },
