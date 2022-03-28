@@ -2,8 +2,6 @@ import * as React from "react"
 import { Grid, Button, Icon, SxProps } from "@mui/material"
 import { Refresh } from "../utils/refresh"
 
-
-
 export default function StepComponent(props: {
     sx?: SxProps
     title: string
@@ -21,6 +19,7 @@ export default function StepComponent(props: {
     return (
         <Grid
             container
+            className="description-container"
             item
             sx={{
                 bgcolor: "background.default",
@@ -35,17 +34,13 @@ export default function StepComponent(props: {
             justifyContent="space-evenly"
             alignItems="center"
         >
-            <Grid item>
-                
-            </Grid>
+            <Grid item></Grid>
             <Grid item xs={10}>
                 <b>{props.title}</b>
                 <br />
                 {props.description}
             </Grid>
-            <Grid item>
-                
-            </Grid>
+            <Grid item></Grid>
         </Grid>
     )
 }

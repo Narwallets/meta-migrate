@@ -15,7 +15,6 @@ function getColor(page: number): "grey" | "primary" | "success" {
     return "grey"
 }
 
-
 export default function TimelineComponent() {
     return (
         <Timeline
@@ -34,36 +33,61 @@ export default function TimelineComponent() {
         >
             <TimelineItem className="timeline-item" onClick={() => jumpTo(0)}>
                 <TimelineSeparator className="timeline-item-separator">
-                    <TimelineDot className="timeline-item-dot" color={getColor(0)} />
-                    <TimelineConnector className="timeline-item-conector"/>
+                    <TimelineDot
+                        className="timeline-item-dot"
+                        color={getColor(0)}
+                    />
+                    <TimelineConnector className="timeline-item-conector" />
                 </TimelineSeparator>
-                <TimelineContent className="timeline-item-content">OLD POSITION</TimelineContent>
+                <TimelineContent className="timeline-item-content">
+                    OLD POSITION
+                </TimelineContent>
             </TimelineItem>
             <TimelineItem className="timeline-item" onClick={() => jumpTo(1)}>
                 <TimelineSeparator className="timeline-item-separator">
-                    <TimelineDot className="timeline-item-dot" color={getColor(1)} />
-                    <TimelineConnector className="timeline-item-conector"/>
+                    <TimelineDot
+                        className="timeline-item-dot"
+                        color={getColor(1)}
+                    />
+                    <TimelineConnector className="timeline-item-conector" />
                 </TimelineSeparator>
-                <TimelineContent className="timeline-item-content">CONVERT</TimelineContent>
+                <TimelineContent className="timeline-item-content">
+                    CONVERT
+                </TimelineContent>
             </TimelineItem>
             <TimelineItem className="timeline-item" onClick={() => jumpTo(2)}>
                 <TimelineSeparator className="timeline-item-separator">
-                    <TimelineDot className="timeline-item-dot" color={getColor(2)} />
-                    <TimelineConnector className="timeline-item-conector"/>
+                    <TimelineDot
+                        className="timeline-item-dot"
+                        color={getColor(2)}
+                    />
+                    <TimelineConnector className="timeline-item-conector" />
                 </TimelineSeparator>
-                <TimelineContent className="timeline-item-content">NEW POSITION</TimelineContent>
+                <TimelineContent className="timeline-item-content">
+                    NEW POSITION
+                </TimelineContent>
             </TimelineItem>
             <TimelineItem className="timeline-item" onClick={() => jumpTo(3)}>
                 <TimelineSeparator className="timeline-item-separator">
-                    <TimelineDot className="timeline-item-dot" color={getColor(3)} />
+                    <TimelineDot
+                        className="timeline-item-dot"
+                        color={getColor(3)}
+                    />
                 </TimelineSeparator>
-                <TimelineContent className="timeline-item-content">PROFIT</TimelineContent>
+                <TimelineContent className="timeline-item-content">
+                    PROFIT
+                </TimelineContent>
             </TimelineItem>
             <TimelineItem className="timeline-item" onClick={() => jumpTo(4)}>
                 <TimelineSeparator className="timeline-item-separator">
-                    <TimelineDot className="timeline-item-dot" color={getColor(4)} />
+                    <TimelineDot
+                        className="timeline-item-dot"
+                        color={getColor(4)}
+                    />
                 </TimelineSeparator>
-                <TimelineContent className="timeline-item-content">LOCATE MY FUNDS</TimelineContent>
+                <TimelineContent className="timeline-item-content">
+                    LOCATE MY FUNDS
+                </TimelineContent>
             </TimelineItem>
         </Timeline>
     )

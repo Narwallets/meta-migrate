@@ -94,9 +94,8 @@ export default function App() {
                     wrap="nowrap"
                     xs={2}
                     sx={{
-                        ml:"2em"
+                        ml: "2em"
                     }}
-                    
                 >
                     <WalletComponent />
                     <TimelineComponent />

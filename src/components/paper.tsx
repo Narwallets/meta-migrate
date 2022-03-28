@@ -6,24 +6,25 @@ import PageComponent from "./page"
 export default function PaperComponent() {
     return (
         <Paper
-            className={"secondary-container-h" + (getPage() == 4 ? " secondary-container-h-last" : "")}
+            className={
+                "secondary-container-h" +
+                (getPage() == 4 ? " secondary-container-h-last" : "")
+            }
             sx={{
                 width: 1,
                 // height: "fit-content",
-                
+
                 display: "flex",
                 // "& > *": {
                 //     height: "unset !important"
                 // }
                 height: "40em",
                 // minHeight: .85,
-                my: "auto",                
+                my: "auto"
             }}
             elevation={2}
         >
-            <PageComponent 
-                page={getPage()}
-             />
+            <PageComponent page={getPage()} />
         </Paper>
     )
 }

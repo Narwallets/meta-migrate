@@ -134,10 +134,10 @@ const Purple = (props: { children: any }) => {
     const theme = useTheme() as any
     return (
         <span
-        style={{
-            color: theme.palette.primary.main,
-            fontWeight: "bold"
-        }}
+            style={{
+                color: theme.palette.primary.main,
+                fontWeight: "bold"
+            }}
         >
             {props.children}
         </span>
@@ -147,12 +147,12 @@ const Purple = (props: { children: any }) => {
 const Note = (props: { children: any }) => {
     return (
         <span
-        style={{
-            fontWeight: "lighter",
-            fontSize: "small",
-            opacity: 0.5,
-            paddingTop: "0.5rem"
-        }}
+            style={{
+                fontWeight: "lighter",
+                fontSize: "small",
+                opacity: 0.5,
+                paddingTop: "0.5rem"
+            }}
         >
             {props.children}
         </span>
@@ -174,8 +174,8 @@ const Input = (props: {
     return (
         <TextField
             sx={{
-                width: .45,
-                mx: 1,
+                width: 0.45,
+                mx: 1
                 // flex: 2,
                 // flexBasis: 0
             }}
@@ -331,10 +331,9 @@ function getContent(page: number): ReactNode | null {
                                 <Note>Execution might take a while.</Note>
                             </Description>
                         }
-                        
                     />
                     <NavButtonComponent
-                        next 
+                        next
                         status
                         completed={
                             window.REFRESHER[1] ??
@@ -448,29 +447,29 @@ function getContent(page: number): ReactNode | null {
                                             )
                                         }
                                     />
-                                    
+
                                     <span className="input-container-equals">
                                         {""} {"\u2248"} {""}
                                         <Purple>
                                             {window.stNEARPrice
                                                 ? parseFloat(
-                                                    (
-                                                        Number(
-                                                            BigInt(
-                                                                inputErrors[0]
-                                                                    ? "0"
-                                                                    : (utils.format.parseNearAmount(
+                                                      (
+                                                          Number(
+                                                              BigInt(
+                                                                  inputErrors[0]
+                                                                      ? "0"
+                                                                      : (utils.format.parseNearAmount(
                                                                             inputValues[0] ??
                                                                                 "0"
                                                                         ) as string) +
                                                                             "0000"
-                                                            ) /
-                                                                BigInt(
-                                                                    window.stNEARPrice
-                                                                )
-                                                        ) / 10000
-                                                    ).toString()
-                                                ).toFixed(5)
+                                                              ) /
+                                                                  BigInt(
+                                                                      window.stNEARPrice
+                                                                  )
+                                                          ) / 10000
+                                                      ).toString()
+                                                  ).toFixed(5)
                                                 : "..."}
                                         </Purple>
                                         {""} $stNEAR.
@@ -479,8 +478,8 @@ function getContent(page: number): ReactNode | null {
                             </Description>
                         }
                     />
-                    <NavButtonComponent 
-                        next 
+                    <NavButtonComponent
+                        next
                         back
                         status
                         completed={
@@ -525,7 +524,7 @@ function getContent(page: number): ReactNode | null {
                                 ) as string
                             )
                         }
-                     />
+                    />
                 </>
             )
 
@@ -632,16 +631,17 @@ function getContent(page: number): ReactNode | null {
                                                     window.OCTBalanceOnRef !==
                                                     undefined
                                                         ? yton(
-                                                            window.OCTBalanceOnRef +
-                                                                "000000"
-                                                        )
+                                                              window.OCTBalanceOnRef +
+                                                                  "000000"
+                                                          )
                                                         : "..."
                                                 } $OCT on Ref-finance.`
                                             }
                                         ]}
                                         onChange={(value: string) => {
                                             if (
-                                                window.newPoolInfo !== undefined &&
+                                                window.newPoolInfo !==
+                                                    undefined &&
                                                 !inputErrors[1]
                                             ) {
                                                 // https://stackoverflow.com/a/54409977/17894968
@@ -651,11 +651,13 @@ function getContent(page: number): ReactNode | null {
                                                         (BigInt("10000000000") *
                                                             BigInt("1000000") *
                                                             BigInt(
-                                                                window.newPoolInfo
+                                                                window
+                                                                    .newPoolInfo
                                                                     .amounts[1]
                                                             )) /
                                                             BigInt(
-                                                                window.newPoolInfo
+                                                                window
+                                                                    .newPoolInfo
                                                                     .amounts[0]
                                                             )
                                                     ) /
@@ -665,7 +667,14 @@ function getContent(page: number): ReactNode | null {
                                         }}
                                         default={inputValuesUnmatched[1]}
                                     />
-                                    <Icon sx={{ alignSelf: "center", lineHeight: "1.5em" }}>link</Icon>
+                                    <Icon
+                                        sx={{
+                                            alignSelf: "center",
+                                            lineHeight: "1.5em"
+                                        }}
+                                    >
+                                        link
+                                    </Icon>
                                     <Input
                                         id={2}
                                         label="amount"
@@ -706,14 +715,19 @@ function getContent(page: number): ReactNode | null {
                                         ]}
                                         onChange={(value: string) => {
                                             if (
-                                                window.newPoolInfo !== undefined &&
+                                                window.newPoolInfo !==
+                                                    undefined &&
                                                 !inputErrors[2]
                                             ) {
                                                 inputValuesUnmatched[1] = (
                                                     (parseFloat(value) *
                                                         Number(
-                                                            (BigInt("10000000000") *
-                                                                BigInt("1000000") *
+                                                            (BigInt(
+                                                                "10000000000"
+                                                            ) *
+                                                                BigInt(
+                                                                    "1000000"
+                                                                ) *
                                                                 BigInt(
                                                                     window
                                                                         .newPoolInfo
@@ -744,11 +758,10 @@ function getContent(page: number): ReactNode | null {
                                 </div>
                             </Description>
                         }
-                        
                     />
-                    <NavButtonComponent 
-                        next 
-                        back 
+                    <NavButtonComponent
+                        next
+                        back
                         status
                         denied={
                             inputErrors[1] ||
@@ -825,6 +838,7 @@ function getContent(page: number): ReactNode | null {
                     <TitleComponent title="Happy Farming!" />
                     <img style={{ height: "100%" }} src={meme} alt="meme" />
                     <Box
+                        className="lp-info-container"
                         sx={{
                             my: 2
                         }}
@@ -1031,9 +1045,9 @@ export default function PageComponent(props: { page: number }) {
         <Grid
             container
             sx={{
-                width: .9,
-                height: .85,
-                m:"auto",
+                width: 0.9,
+                height: 0.85,
+                m: "auto"
             }}
             direction="column"
             justifyContent="space-evenly"

@@ -27,7 +27,6 @@ export default function TitleComponent(props: {
                         verticalAlign: "baseline",
                         marginRight: ".5em"
                     }}
-                    
                 >
                     {`Step ${props.step}:`}
                 </span>
