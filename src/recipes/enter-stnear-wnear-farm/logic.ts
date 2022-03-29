@@ -11,46 +11,57 @@ export default class Logic extends BaseLogic {
     stNEARBalance?: string
 
     /**
-     * take NEAR tokens, provide liquidity to wNear<>stNear, stake on farm
+     * take NEAR tokens, wrap 50% and stake 50% on metapool to get stNEAR
      *
      * @param allowance
      */
-    async stepOneAction(allowance: string): Promise<void> {
+    async stepOneAction (allowance: string): Promise<void> {
         // recipe wraps one half of provided NEAR
         const amountToWrap = (BigInt(allowance) / BigInt("2")).toString()
         // recipe stakes one half of provided NEAR with metapool
         const amountToStake = (BigInt(allowance) / BigInt("2")).toString()
-        // fetch metapool info and stNEAR<>wNEAR pool info
-        const [{ st_near_price }, { total_shares, amounts }] = await Promise.all([
-            this.getMetapoolInfo(),
-            this.getPoolInfo(this.STNEAR_WNEAR_POOL_ID)
-        ])
-        // get expected amount of stNEAR user gets by staking amountToWrap
-        const estimatedStnearAmount = this.estimateStnearOut(amountToStake, st_near_price, 10)
-        // estimate received LP shares
-        const lpShares: string = this.calcLpSharesFromAmounts(total_shares, amounts, [
-            estimatedStnearAmount,
-            amountToWrap
-        ])
 
         this.passToWallet([
             // wrap half of provided NEAR tokens
             this.nearToWnear(amountToWrap),
             // stake on metapool half of provided NEAR tokens
-            this.nearToStnear(amountToStake),
+            this.nearToStnear(amountToStake)
+        ])
+    }
+
+    /**
+     * deposit on Ref, LP to wNear<>stNear and stake on farm
+     * 
+     * @param amounts 
+     */
+    async stepTwoAction (amounts: {
+        stnearAmount: string,
+        wnearAmount: string
+    }): Promise<void> {
+        const { stnearAmount, wnearAmount } = amounts;
+
+        // fetch metapool info and stNEAR<>wNEAR pool info
+        const { total_shares, pool_amounts } = await this.getPoolInfo(this.STNEAR_WNEAR_POOL_ID)
+        // estimate received LP shares
+        const lpShares: string = this.calcLpSharesFromAmounts(total_shares, pool_amounts, [
+            stnearAmount,
+            wnearAmount
+        ])
+
+        this.passToWallet([
             // deposit both tokens on ref-finance
             this.depositTokensOnRef([
-                { token: window.nearConfig.ADDRESS_METAPOOL, amount: estimatedStnearAmount },
-                { token: window.nearConfig.ADDRESS_WNEAR, amount: amountToWrap }
+                { token: window.nearConfig.ADDRESS_METAPOOL, amount: stnearAmount },
+                { token: window.nearConfig.ADDRESS_WNEAR, amount: wnearAmount }
             ]),
             // rovide liquidity to stNEAR<>wNEAR pool
-            this.addLiquidity([{ pool_id: this.STNEAR_WNEAR_POOL_ID, amounts: [estimatedStnearAmount, amountToWrap] }]),
+            this.addLiquidity([{ pool_id: this.STNEAR_WNEAR_POOL_ID, amounts: [stnearAmount, wnearAmount] }]),
             // stake on farm
             this.farmStake(lpShares, this.STNEAR_WNEAR_POOL_ID)
         ])
     }
 
-    async stnearWnearFarmingStake(): Promise<string> {
+    async stnearWnearFarmingStake (): Promise<string> {
         const stake_shares: string = await this.getFarmingStake(this.STNEAR_WNEAR_POOL_ID)
         return stake_shares
     }

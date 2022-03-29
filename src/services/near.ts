@@ -238,7 +238,7 @@ export default class BaseLogic {
     async getPoolInfo(poolID: number): Promise<{
         user_shares: string
         total_shares: string
-        amounts: string[]
+        pool_amounts: string[]
     }> {
         // get user shares
         const user_shares: string = await window.account.viewFunction(
