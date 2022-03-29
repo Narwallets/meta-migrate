@@ -1,6 +1,6 @@
 import * as React from "react"
 import { ReactNode, useEffect, useState } from "react"
-import { Description, Break, Loading, Purple, Note } from "../../components/description"
+import { Description, Break, Loading, Purple, Note, LineSpacing } from "../../components/description"
 import { InputData, InputComponent } from "../../components/input"
 import LocateComponent from "../../components/locate"
 import NavButtonComponent from "../../components/navbuttons"
@@ -9,16 +9,17 @@ import TitleComponent from "../../components/title"
 import meme from "../../memes/2.gif"
 import { Refresh } from "../../utils/refresh"
 import { utils } from "near-api-js"
-import { yton } from "../../utils/math"
+import { getMaxInvest, yton } from "../../utils/math"
 import Logic from "./logic"
 import { getFarmAPR } from "../../utils/apr"
+import { Box, Icon } from "@mui/material"
 
 const NEAR = new Logic()
 
-let allowanceInput: InputData
+let allowanceInput: InputData, wNEARInput: InputData, stNEARInput: InputData
 let refresh: Refresh[] = []
 
-export const steps: string[] = ["enter farm", "profit"]
+export const steps: string[] = ["get tokens", "enter farm", "profit"]
 
 export function getContent(page: number): ReactNode | null {
     switch (page) {
@@ -65,14 +66,12 @@ export function getContent(page: number): ReactNode | null {
             const balance = Loading(!!NEAR?.nativeNEARBalance, NEAR.nativeNEARBalance, s => yton(s)!)
             return (
                 <>
-                    <TitleComponent title="Enter stNEAR <-> wNEAR Farm" step={1} />
+                    <TitleComponent title="NEAR -> stNEAR & wNEAR" step={1} />
                     <StepComponent
                         title={"Specify the recipe allowace in $NEAR."}
                         description={
                             <Description>
-                                Your NEAR will be staked and wrapped in equal parts, {""}
-                                provided as liquidity in the stNEAR {"<->"} wNEAR pool and {""}
-                                finally the LP Shares are put into the stNEAR {"<->"} wNEAR farm. {""}
+                                Your NEAR will be staked and wrapped in equal parts.
                                 <Break />
                                 You currently have <Purple>{balance}</Purple>&nbsp;$NEAR in your wallet.
                                 <Break />
@@ -82,8 +81,6 @@ export function getContent(page: number): ReactNode | null {
                                     type="number"
                                     unit="NEAR"
                                 />
-                                <Break />
-                                <Note>Execution might take a while.</Note>
                             </Description>
                         }
                         denied={allowanceInput?.data.error}
@@ -98,16 +95,142 @@ export function getContent(page: number): ReactNode | null {
 
         case 1:
             // Define Inputs
-            // -
+            if (NEAR.poolInfo !== undefined && NEAR.stNEARBalance !== undefined && NEAR.wNEARBalance !== undefined) {
+                const values = getMaxInvest([NEAR.stNEARBalance!, NEAR.wNEARBalance!], NEAR.poolInfo.pool_amounts)
+                wNEARInput ??= new InputData({
+                    value: yton(values[1]),
+                    pattern: /^\d+(\.\d{0,18})?$/,
+                    assert: [
+                        {
+                            test: (value: string) =>
+                                NEAR.wNEARBalance !== undefined &&
+                                BigInt(utils.format.parseNearAmount(value) ?? "0") > BigInt(NEAR.wNEARBalance),
+                            msg: () =>
+                                `Insufficient funds. You only have ${
+                                    NEAR.wNEARBalance !== undefined ? yton(NEAR.wNEARBalance) : "..."
+                                } $wNEAR.`
+                        }
+                    ]
+                })
+
+                stNEARInput ??= new InputData({
+                    value: yton(values[0]),
+                    pattern: /^\d+(\.\d{0,24})?$/,
+                    assert: [
+                        {
+                            test: (value: string) =>
+                                NEAR.stNEARBalance !== undefined &&
+                                BigInt(utils.format.parseNearAmount(value) ?? "0") > BigInt(NEAR.stNEARBalance),
+                            msg: () =>
+                                `Insufficient funds. You only have ${
+                                    NEAR.stNEARBalance !== undefined ? yton(NEAR.stNEARBalance) : "..."
+                                } $stNEAR.`
+                        }
+                    ]
+                })
+
+                NEAR.lpSharesToStake = NEAR.calcLpSharesFromAmounts(
+                    NEAR.poolInfo.total_shares,
+                    NEAR.poolInfo.pool_amounts,
+                    [
+                        utils.format.parseNearAmount(stNEARInput.data.error ? "0" : stNEARInput.data.value ?? "0")!,
+                        utils.format.parseNearAmount(wNEARInput.data.error ? "0" : wNEARInput.data.value ?? "0")!
+                    ]
+                )
+            }
             // Define Refresh
-            // -
+            refresh[1] ??= new Refresh(
+                () =>
+                    Promise.all([
+                        NEAR.getPoolInfo(NEAR.STNEAR_WNEAR_POOL_ID),
+                        NEAR.getTokenBalances([NEAR.ADDRESS_METAPOOL, NEAR.ADDRESS_WNEAR])
+                    ]).then(res => {
+                        NEAR.poolInfo = res[0]
+                        NEAR.stNEARBalance = res[1][0]
+                        NEAR.wNEARBalance = res[1][1]
+                        return false
+                    }),
+                0
+            )
             // Define Values
-            // -
+            const inLPShares = Loading(!!NEAR.poolInfo, NEAR.lpSharesToStake, s => yton(s)!)
+            const stNEARBalance = Loading(!!NEAR.stNEARBalance, NEAR.stNEARBalance, s => yton(s)!)
+            const wNEARBalance = Loading(!!NEAR.wNEARBalance, NEAR.wNEARBalance, s => yton(s)!)
             return (
                 <>
-                    <TitleComponent title="Happy Farming!" />
-                    <img src={meme} style={{ maxWidth: "50%" }} alt="meme" />
-                    <NavButtonComponent back />
+                    <TitleComponent title="Enter stNEAR <-> wNEAR farm" step={2} />
+                    <StepComponent
+                        title={"Provide LP and stake."}
+                        description={
+                            <Description>
+                                Provided your tokens as liquidity in the stNEAR {"<->"} wNEAR pool and {""}
+                                put your LP Shares into the stNEAR {"<->"} wNEAR farm. {""}
+                                <LineSpacing />
+                                You currently have <Purple>{stNEARBalance}</Purple>&nbsp;$stNEAR and {""}
+                                <Purple>{wNEARBalance}</Purple>&nbsp;$wNEAR.
+                                <Break />
+                                <InputComponent
+                                    data={stNEARInput ?? new InputData({ value: "" })}
+                                    label="amount"
+                                    unit="stNEAR"
+                                    type="number"
+                                    onChange={(value: string) => {
+                                        if (NEAR.poolInfo !== undefined && !stNEARInput.data.error) {
+                                            wNEARInput.data.unmatched = (
+                                                (parseFloat(value) *
+                                                    Number(
+                                                        (BigInt("10000000000") *
+                                                            BigInt(NEAR.poolInfo.pool_amounts[1])) /
+                                                            BigInt(NEAR.poolInfo.pool_amounts[0])
+                                                    )) /
+                                                10000000000
+                                            ).toFixed(5) // TODO: check if final pool is [wNEAR, stNEAR] or [stNEAR, wNEAR]
+                                        }
+                                    }}
+                                />
+                                <Icon sx={{ alignSelf: "center" }}>link</Icon>
+                                <InputComponent
+                                    data={wNEARInput ?? new InputData({ value: "" })}
+                                    label="amount"
+                                    unit="wNEAR"
+                                    type="number"
+                                    onChange={(value: string) => {
+                                        if (NEAR.poolInfo !== undefined && !wNEARInput.data.error) {
+                                            // https://stackoverflow.com/a/54409977/17894968
+                                            stNEARInput.data.unmatched = (
+                                                parseFloat(value) /
+                                                (Number(
+                                                    (BigInt("10000000000") * BigInt(NEAR.poolInfo.pool_amounts[1])) /
+                                                        BigInt(NEAR.poolInfo.pool_amounts[0])
+                                                ) /
+                                                    10000000000)
+                                            ).toFixed(5) // TODO: check if final pool is [wNEAR, stNEAR] or [stNEAR, wNEAR]
+                                        }
+                                    }}
+                                />
+                                <Break />
+                                {"\u2248"} <Purple>{inLPShares}</Purple>&nbsp;LP&nbsp;shares.
+                                <Break />
+                                <Note>Execution might take a while.</Note>
+                            </Description>
+                        }
+                        denied={
+                            !wNEARInput ||
+                            !stNEARInput ||
+                            wNEARInput.data.error ||
+                            stNEARInput.data.error ||
+                            parseFloat(wNEARInput.data.unmatched) === 0 ||
+                            parseFloat(stNEARInput.data.unmatched) === 0
+                        }
+                        completed={refresh[1]}
+                        action={() => {
+                            NEAR.stepTwoAction({
+                                stnearAmount: utils.format.parseNearAmount(stNEARInput.data.value)!,
+                                wnearAmount: utils.format.parseNearAmount(wNEARInput.data.value)!
+                            })
+                        }}
+                    />
+                    <NavButtonComponent next />
                 </>
             )
 
@@ -115,18 +238,47 @@ export function getContent(page: number): ReactNode | null {
             // Define Inputs
             // -
             // Define Refresh
+            refresh[3] ??= new Refresh(
+                () =>
+                    NEAR.getFarmingStake(NEAR.STNEAR_WNEAR_POOL_ID).then(res => {
+                        NEAR.farmShares = res
+                        return true
+                    }),
+                0
+            )
+            // Define Values
+            const farmingStake = Loading(!!NEAR.farmShares, NEAR.farmShares, s => yton(s)!)
+            return (
+                <>
+                    <TitleComponent title="Happy Farming!" />
+                    <img src={meme} style={{ maxWidth: "50%" }} alt="meme" />
+                    <Box sx={{ my: 2 }}>
+                        You currently have <Purple>{farmingStake}</Purple>&nbsp;LP&nbsp;shares in the farm.
+                    </Box>
+                    <NavButtonComponent back />
+                </>
+            )
+
+        case 3:
+            // Define Inputs
+            // -
+            // Define Refresh
             refresh[4] ??= new Refresh(
                 () =>
                     Promise.all([
-                        NEAR.getWnearBalanceOnRef(),
-                        NEAR.getStnearBalanceOnRef(),
-                        NEAR.getStnearBalance(),
-                        NEAR.getNativeNearBalance()
+                        NEAR.getTokenBalancesOnRef([NEAR.ADDRESS_METAPOOL, NEAR.ADDRESS_WNEAR]),
+                        NEAR.getTokenBalances([NEAR.ADDRESS_METAPOOL, NEAR.ADDRESS_WNEAR]),
+                        NEAR.getNativeNearBalance(),
+                        NEAR.getPoolInfo(NEAR.STNEAR_WNEAR_POOL_ID),
+                        NEAR.getFarmingStake(NEAR.STNEAR_WNEAR_POOL_ID)
                     ]).then(res => {
-                        NEAR.wNEARBalanceOnRef = res[0]
-                        NEAR.stNEARBalanceOnRef = res[1]
-                        NEAR.stNEARBalance = res[2]
-                        NEAR.nativeNEARBalance = res[3]
+                        NEAR.wNEARBalanceOnRef = res[0][1]
+                        NEAR.stNEARBalanceOnRef = res[0][0]
+                        NEAR.stNEARBalance = res[1][0]
+                        NEAR.wNEARBalance = res[1][1]
+                        NEAR.nativeNEARBalance = res[2]
+                        NEAR.poolShares = res[3].user_shares
+                        NEAR.farmShares = res[4]
                         return true
                     }),
                 0
@@ -156,8 +308,27 @@ export function getContent(page: number): ReactNode | null {
                 {
                     location: "",
                     link: `https://wallet.near.org/`,
+                    amount: NEAR?.wNEARBalance,
+                    unit: "wNEAR",
+                    noline: true
+                },
+                {
+                    location: "",
+                    link: `https://wallet.near.org/`,
                     amount: NEAR?.stNEARBalance,
                     unit: "stNEAR"
+                },
+                {
+                    location: "stNEAR <-> wNEAR Pool",
+                    link: `https://app.ref.finance/pool/${NEAR.NEW_POOL_ID}`,
+                    amount: NEAR?.poolShares,
+                    unit: "LP"
+                },
+                {
+                    location: "stNEAR <-> wNEAR Farm",
+                    link: `https://app.ref.finance/farms`,
+                    amount: NEAR?.farmShares,
+                    unit: "LP"
                 }
             ]
             return <LocateComponent rows={rows} />

@@ -34,7 +34,7 @@ const recipes: recipe[] = [
     {
         id: 2,
         title: "Enter stNEAR <-> wNEAR farm",
-        description: "One click to start farming!",
+        description: "Two clicks to start farming!",
         apy: EnterStNEARWNEARFarm.APY,
         content: EnterStNEARWNEARFarm.getContent,
         steps: EnterStNEARWNEARFarm.steps

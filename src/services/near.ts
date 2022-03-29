@@ -77,7 +77,7 @@ export default class BaseLogic {
 
         const user_total_shares = (BigInt(user_farm_shares) + BigInt(pool_info.user_shares)).toString()
 
-        const min_amounts = this.calcMinAmountsOut(user_total_shares, pool_info.total_shares, pool_info.amounts)
+        const min_amounts = this.calcMinAmountsOut(user_total_shares, pool_info.total_shares, pool_info.pool_amounts)
 
         return {
             user_total_shares,
@@ -261,7 +261,7 @@ export default class BaseLogic {
             pool_id: poolID
         })
 
-        return { user_shares, total_shares, amounts }
+        return { user_shares, total_shares, pool_amounts: amounts }
     }
 
     /**
@@ -284,9 +284,9 @@ export default class BaseLogic {
             // current position info
             const { pool_id, amounts } = positions[i]
 
-            // set slippage protection to 0.5%
+            // set slippage protection to 0.1%
             const min_lp_amounts: string[] = amounts.map(amount => {
-                return ((BigInt(amount) * BigInt("995")) / BigInt("1000")).toString()
+                return ((BigInt(amount) * BigInt("999")) / BigInt("1000")).toString()
             })
 
             // add liquidity to pool
@@ -521,29 +521,42 @@ export default class BaseLogic {
         }
     }
 
-    // get user stNEAR on metapool
-    async getStnearBalance(): Promise<string> {
-        const balance: string = await window.account.viewFunction(window.nearConfig.ADDRESS_METAPOOL, "ft_balance_of", {
-            account_id: window.account.accountId
-        })
-        return balance
+    /**
+     * query user balance of multiple fungible tokens
+     * 
+     * @param tokens token addresses
+     */
+    async getTokenBalances (tokens: string[]): Promise<string[]> {
+        const balances: string[] = await Promise.all(tokens.map(async (token) => {
+
+            // query user balance of token
+            const balance: string = await window.account.viewFunction(
+                token,
+                "ft_balance_of",
+                { account_id: window.account.accountId }
+            )
+            return balance
+        }));
+
+        return balances;
     }
 
-    // get user stNEAR balance on Ref-finance
-    async getStnearBalanceOnRef(): Promise<string> {
-        const balance = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_EXCHANGE, "get_deposits", {
-            account_id: window.account.accountId
+    /**
+     * query user's Ref deposits of multiple fungible tokens
+     * 
+     * @param tokens token addresses
+     */
+    async getTokenBalancesOnRef (tokens: string[]): Promise<string[]> {
+        const refBalances: any = await window.account.viewFunction(
+            window.nearConfig.ADDRESS_REF_EXCHANGE,
+            "get_deposits",
+            { account_id: window.account.accountId }
+        )
+        const balances: string[] = tokens.map( token => {
+            return refBalances[token] ? refBalances[token] : "0"
         })
-        return balance[window.nearConfig.ADDRESS_METAPOOL] ? balance[window.nearConfig.ADDRESS_METAPOOL] : "0"
-    }
 
-    // get user stNEAR balance on Ref-finance
-    async getOctBalanceOnRef(): Promise<string> {
-        const balance = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_EXCHANGE, "get_deposits", {
-            account_id: window.account.accountId
-        })
-        console.log("Balance: ", window.nearConfig.ADDRESS_REF_EXCHANGE)
-        return balance[window.nearConfig.ADDRESS_OCT] ? balance[window.nearConfig.ADDRESS_OCT] : "0"
+        return balances;
     }
 
     /**

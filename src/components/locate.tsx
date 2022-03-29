@@ -22,13 +22,13 @@ export default function LocateComponent(props: { rows: row[] }) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {props.rows.map(row => (
+                        {props.rows.map((row, i) => (
                             <TableRow
-                                key={row.location}
+                                key={i}
                                 sx={
-                                    row.noline
-                                        ? { "& *": { border: 0 } }
-                                        : { "&:last-child td, &:last-child th": { border: 0 } }
+                                    !!row?.noline
+                                        ? { "& *": { border: "0 !important" } }
+                                        : { "&:last-child td, &:last-child th": { border: "0 !important" } }
                                 }
                             >
                                 <TableCell

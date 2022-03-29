@@ -4,7 +4,15 @@ import RecipesLogo from "../public/logo.svg"
 import { NavLink } from "react-router-dom"
 export default function Header() {
     return (
-        <Grid sx={{ margin: 4 }}>
+        <Grid
+            sx={{
+                m: 4,
+                position: "absolute",
+                left: 0,
+                right: 0,
+                zIndex: 1
+            }}
+        >
             <header>
                 <NavLink to={"/"}>
                     <img src={RecipesLogo} alt=""></img>
