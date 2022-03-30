@@ -14,7 +14,7 @@ function getState(completed: boolean | null, denied?: boolean) {
 export default function NavButtonComponent(props: {
     next?: boolean
     back?: boolean
-    status?: boolean
+    // status?: boolean
     completed?: Refresh
     denied?: boolean
     action?: () => void
@@ -41,18 +41,20 @@ export default function NavButtonComponent(props: {
             ) : (
                 <div></div>
             )}
+            
+
             <div>
-                {props.status && props.completed !== undefined ? (
+                {/*props.status &&*/ props.completed !== undefined ? (
                     <Button
                         variant="contained"
                         sx={{
                             borderRadius: "100px",
                             mr: ".75em"
-                            // position: "absolute",
-                            // bottom: "-68px",
-                            // right: "calc(5% + 100px + 2px)"
                         }}
-                        disabled={props.completed.getResult() !== undefined || props.denied}
+                        disabled={
+                            props.completed.getResult() !== undefined ||
+                            props.denied
+                        }
                         onClick={props?.action}
                     >
                         {getState(props.completed.getResult(), props.denied)}

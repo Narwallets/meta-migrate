@@ -7,7 +7,7 @@ export default function Header() {
         <Grid
             className="header"
             sx={{
-                m: 4,
+                m: 4
             }}
         >
             <header>

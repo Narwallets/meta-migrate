@@ -95,9 +95,9 @@ export function RecipePage() {
             <Grid
                 container
                 sx={{
-                    width: 1,
-                    height: 1,
-                    flex: "1 1 0"
+                    // width: 1,
+                    // height: 1,
+                    // flex: "1 1 0"
                 }}
                 className="main-container timeline-container"
                 direction="row"
@@ -135,18 +135,12 @@ export function RecipePage() {
                     }}
                 >
                     <Paper
-                        className={"secondary-container-h" + (getPage() == 4 ? " secondary-container-h-last" : "")}
+                        className={"secondary-container-h" + (getPage() == recipes[parseInt(params.recipeId!)].steps.length - 1 ? " secondary-container-h-last" : "")}
                         sx={{
                             width: 1,
-                            // height: "fit-content",
                             display: "flex",
                             height: "40em",
-                            my: "auto",
-                            // minHeight: 1,
-                            // mb: 4,
-                            // "& > *": {
-                            //     height: "unset !important"
-                            // }
+                            my: "auto"
                         }}
                         elevation={2}
                     >
@@ -168,7 +162,7 @@ export function CatalogPage() {
                 width: 1,
                 height: 1,
                 flex: "1 1 0",
-                overflowY: "scroll",
+                // overflowY: "scroll",
                 mt: 20
             }}
             direction="column"
@@ -177,16 +171,18 @@ export function CatalogPage() {
         >
             {recipes.map(r => (
                 <Paper
+                    className="recipe-container"
                     sx={{
-                        width: 0.5,
-                        maxWidth: "800px",
-                        height: "min-content",
+                        width: 0.6,
+                        // maxWidth: "800px",
+                        // height: "min-content",
                         mb: 4,
                         p: 2,
                         display: "flex",
                         flexFlow: "column nowrap",
                         position: "relative",
                         "&::before": {
+                            width: "100px",
                             content: "''",
                             position: "absolute",
                             left: "-6rem",
@@ -201,7 +197,7 @@ export function CatalogPage() {
                     }}
                     elevation={2}
                 >
-                    <h1
+                    <div
                         style={{
                             position: "absolute",
                             left: "-6rem",
@@ -216,7 +212,7 @@ export function CatalogPage() {
                         }}
                     >
                         {r.apy()}
-                    </h1>
+                    </div>
                     <span
                         style={{
                             position: "absolute",

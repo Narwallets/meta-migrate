@@ -19,7 +19,7 @@ const NEAR = new Logic()
 let allowanceInput: InputData, wNEARInput: InputData, stNEARInput: InputData
 let refresh: Refresh[] = []
 
-export const steps: string[] = ["get tokens", "enter farm", "profit"]
+export const steps: string[] = ["get tokens", "enter farm", "profit", "locate my funds"]
 
 export function getContent(page: number): ReactNode | null {
     switch (page) {
@@ -89,7 +89,7 @@ export function getContent(page: number): ReactNode | null {
                             NEAR.stepOneAction(utils.format.parseNearAmount(allowanceInput.data.value)!)
                         }}
                     />
-                    <NavButtonComponent next />
+                    <NavButtonComponent next completed={refresh[0]}/>
                 </>
             )
 
@@ -230,7 +230,7 @@ export function getContent(page: number): ReactNode | null {
                             })
                         }}
                     />
-                    <NavButtonComponent next />
+                    <NavButtonComponent next completed={refresh[1]}/>
                 </>
             )
 
@@ -251,8 +251,8 @@ export function getContent(page: number): ReactNode | null {
             return (
                 <>
                     <TitleComponent title="Happy Farming!" />
-                    <img src={meme} style={{ maxWidth: "50%" }} alt="meme" />
-                    <Box sx={{ my: 2 }}>
+                    <img src={meme} style={{ maxHeight: "75%" }} alt="meme" />
+                    <Box className="lp-balance-container" sx={{ my: 2 }}>
                         You currently have <Purple>{farmingStake}</Purple>&nbsp;LP&nbsp;shares in the farm.
                     </Box>
                     <NavButtonComponent back />

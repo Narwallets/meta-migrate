@@ -144,7 +144,7 @@ export function getContent(page: number): ReactNode | null {
             return (
                 <>
                     <TitleComponent title="Happy Farming!" />
-                    <img src={meme} alt="meme" />
+                    <img src={meme} style={{ maxHeight: "75%" }} alt="meme" />
                     <NavButtonComponent back />
                 </>
             )

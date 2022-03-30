@@ -74,7 +74,7 @@ export function getContent(page: number): ReactNode | null {
                             )
                         }}
                     />
-                    <NavButtonComponent next />
+                    <NavButtonComponent next completed={refresh[0]}/>
                 </>
             )
 
@@ -149,7 +149,7 @@ export function getContent(page: number): ReactNode | null {
                         denied={stakeInput.data.error}
                         action={() => NEAR.stepTwoAction(utils.format.parseNearAmount(stakeInput.data.value)!)}
                     />
-                    <NavButtonComponent next back />
+                    <NavButtonComponent next back completed={refresh[1]}/>
                 </>
             )
 
@@ -317,7 +317,7 @@ export function getContent(page: number): ReactNode | null {
                             )
                         }}
                     />
-                    <NavButtonComponent next back />
+                    <NavButtonComponent next back completed={refresh[2]}/>
                 </>
             )
 
@@ -338,8 +338,8 @@ export function getContent(page: number): ReactNode | null {
             return (
                 <>
                     <TitleComponent title="Happy Farming!" />
-                    <img src={meme} alt="meme" />
-                    <Box sx={{ my: 2 }}>
+                    <img src={meme} style={{ maxHeight: "75%" }} alt="meme" />
+                    <Box className="lp-balance-container" sx={{ my: 2 }}>
                         You currently have <Purple>{farmingStake}</Purple>&nbsp;LP&nbsp;shares in the farm.
                     </Box>
                     <NavButtonComponent back />

@@ -1,4 +1,5 @@
 import { InputAdornment, TextField } from "@mui/material"
+import { height, margin } from "@mui/system"
 
 const InputComponent = (props: {
     data: InputData
@@ -11,10 +12,12 @@ const InputComponent = (props: {
     props.data.setInputErrors(pattern, assert)
     return (
         <TextField
+            className="text-field-container"
             sx={{
                 mx: 1,
                 flex: 2,
-                flexBasis: 0
+                flexBasis: 0,
+                fontSize: "40px"
             }}
             label={props.label}
             variant="outlined"
@@ -31,10 +34,14 @@ const InputComponent = (props: {
                     ? {}
                     : {
                           pattern: pattern
-                      })
+                      }),
+                     style: {
+                         fontSize: "1.5rem",
+                         height: "50px"
+                     }
             }}
             InputLabelProps={{
-                shrink: true
+                shrink: true,
             }}
             value={unmatched}
             error={error}

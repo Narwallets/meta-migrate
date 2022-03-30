@@ -72,6 +72,13 @@ html {
 }
 
 @media only screen and (max-width: 1050px) {
+    .recipe-container {
+        width: 80%!important;
+        height: 170px!important;
+        min-height: fit-content!important;
+        font-size: 1.7rem;
+    }
+
     .main-container {
         /* margin-left: 500px; */
         display: flex;
@@ -89,7 +96,7 @@ html {
         display: flex !important;
         flex-direction: row !important;
         justify-content: space-between;
-        max-height: 6em !important;
+        max-height: 7em !important;
         margin-top: 2.25em;
         padding-left: 0 !important;
     }
@@ -97,6 +104,7 @@ html {
     .timeline-item {
         flex-direction: column-reverse !important;
         align-items: center;
+        width: 100%;
     }
 
     .timeline-item-separator {
@@ -106,13 +114,18 @@ html {
         padding-left: 2.75em !important;
     }
 
-    .timeline-item-conector {
+    .steps4 .timeline-item-conector {
         height: 3px !important;
-        /* Properties for connected dots */
-        /* padding-left: 10.5em; */
         /* Properties for almost connected dots */
-        padding-left: 8.5em;
-        margin-left: 0.9em !important;
+        padding-left: 14em;
+        margin-left: 1em !important;
+    }
+
+    .steps5 .timeline-item-conector {
+        height: 3px !important;
+        /* Properties for almost connected dots */
+        padding-left: 11.5em;
+        margin-left: 0.5em !important;
     }
 
     .timeline-item-content {
@@ -132,7 +145,8 @@ html {
     } */
 
     .secondary-container-h-last {
-        height: 49em !important;
+        /* height: fit-content; */
+        height: 55em !important;
     }
 
     /* Typhography */
@@ -147,12 +161,22 @@ html {
         font-size: 30px !important;
     }
 
-    button,
+    button {
+        font-size: xx-large !important;
+        width: 6em;
+    }
+
     a {
-        font-size: larger !important;
+        font-size: xx-large !important;
+        width: 13em;
     }
 
     button.username-container {
         font-size: 30px !important;
+        width: fit-content!important;
+    }
+
+    .lp-balance-container {
+        font-size: 2rem;
     }
 }
