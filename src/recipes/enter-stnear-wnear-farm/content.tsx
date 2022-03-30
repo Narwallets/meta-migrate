@@ -342,7 +342,7 @@ export function APY() {
     const [percentage, setPercentage] = useState("...")
     useEffect(() => {
         async function getPercentage() {
-            let percentage = (await getFarmAPR())?.ref_oct_st_near_apr
+            let percentage = (await getFarmAPR())?.ref_wnear_st_near_apr
             if (isNaN(percentage) || percentage === 0) {
                 percentage = "..."
             }

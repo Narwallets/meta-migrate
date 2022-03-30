@@ -523,40 +523,39 @@ export default class BaseLogic {
 
     /**
      * query user balance of multiple fungible tokens
-     * 
+     *
      * @param tokens token addresses
      */
-    async getTokenBalances (tokens: string[]): Promise<string[]> {
-        const balances: string[] = await Promise.all(tokens.map(async (token) => {
+    async getTokenBalances(tokens: string[]): Promise<string[]> {
+        const balances: string[] = await Promise.all(
+            tokens.map(async token => {
+                // query user balance of token
+                const balance: string = await window.account.viewFunction(token, "ft_balance_of", {
+                    account_id: window.account.accountId
+                })
+                return balance
+            })
+        )
 
-            // query user balance of token
-            const balance: string = await window.account.viewFunction(
-                token,
-                "ft_balance_of",
-                { account_id: window.account.accountId }
-            )
-            return balance
-        }));
-
-        return balances;
+        return balances
     }
 
     /**
      * query user's Ref deposits of multiple fungible tokens
-     * 
+     *
      * @param tokens token addresses
      */
-    async getTokenBalancesOnRef (tokens: string[]): Promise<string[]> {
+    async getTokenBalancesOnRef(tokens: string[]): Promise<string[]> {
         const refBalances: any = await window.account.viewFunction(
             window.nearConfig.ADDRESS_REF_EXCHANGE,
             "get_deposits",
             { account_id: window.account.accountId }
         )
-        const balances: string[] = tokens.map( token => {
+        const balances: string[] = tokens.map(token => {
             return refBalances[token] ? refBalances[token] : "0"
         })
 
-        return balances;
+        return balances
     }
 
     /**
