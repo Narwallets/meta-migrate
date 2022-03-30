@@ -99,7 +99,7 @@ export function RecipePage() {
                     height: 1,
                     flex: "1 1 0"
                 }}
-                className="timeline-container"
+                className="main-container timeline-container"
                 direction="row"
                 justifyContent="center"
                 alignItems="center"
@@ -109,12 +109,14 @@ export function RecipePage() {
                 <Grid
                     item
                     container
+                    className="nav-container"
                     direction="column"
                     alignItems="flex-end"
                     wrap="nowrap"
                     flexShrink={0}
                     sx={{
-                        height: "fit-content"
+                        height: "fit-content",
+                        ml: "2em"
                     }}
                     xs={2}
                 >
@@ -123,31 +125,35 @@ export function RecipePage() {
                 </Grid>
                 <Grid
                     item
+                    className="secondary-container"
                     sx={{
                         height: 0.5,
-                        minHeight: "500px",
-                        maxHeight: "800px",
-                        flexBasis: "800px",
+                        minHeight: "25rem",
+                        flexBasis: "50rem",
                         flexShrink: 0,
                         width: 0.5
                     }}
                 >
                     <Paper
+                        className={"secondary-container-h" + (getPage() == 4 ? " secondary-container-h-last" : "")}
                         sx={{
                             width: 1,
-                            height: "fit-content",
-                            minHeight: 1,
-                            mb: 4,
+                            // height: "fit-content",
                             display: "flex",
-                            "& > *": {
-                                height: "unset !important"
-                            }
+                            height: "40em",
+                            my: "auto",
+                            // minHeight: 1,
+                            // mb: 4,
+                            // "& > *": {
+                            //     height: "unset !important"
+                            // }
                         }}
                         elevation={2}
                     >
                         <PageComponent recipe={parseInt(params.recipeId!)} page={getPage()} />
                     </Paper>
                 </Grid>
+                {/* Empty item for design purposes */}
                 <Grid item xs={2} sx={{ height: 0, flex: "1 1 0 !important" }} />
             </Grid>
         </>

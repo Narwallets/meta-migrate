@@ -18,9 +18,10 @@ function getColor(page: number): "grey" | "primary" | "success" {
 export default function TimelineComponent(props: { steps: string[] }) {
     return (
         <Timeline
+            className="timeline"
             sx={{
-                flexBasis: "200px",
-                alignItems: "flex-end",
+                flexBasis: "12.5rem",
+                alignItems: "end",
                 "& > .MuiTimelineItem-root::before": {
                     flex: 0
                 },
@@ -31,20 +32,24 @@ export default function TimelineComponent(props: { steps: string[] }) {
             position="left"
         >
             {props.steps.map((s, i) => (
-                <TimelineItem onClick={() => jumpTo(i)}>
-                    <TimelineSeparator>
-                        <TimelineDot color={getColor(i)} />
-                        {i !== props.steps.length - 1 ? <TimelineConnector /> : <></>}
+                <TimelineItem className="timeline-item" onClick={() => jumpTo(i)}>
+                    <TimelineSeparator className="timeline-item-separator">
+                        <TimelineDot className="timeline-item-dot" color={getColor(i)} />
+                        {i < props.steps.length - 2 ? (
+                            <TimelineConnector className="timeline-item-conector" />
+                        ) : (
+                            <></>
+                        )}
                     </TimelineSeparator>
-                    <TimelineContent>{s.toUpperCase()}</TimelineContent>
+                    <TimelineContent className="timeline-item-content">{s.toUpperCase()}</TimelineContent>
                 </TimelineItem>
             ))}
-            <TimelineItem onClick={() => jumpTo(props.steps.length)}>
+            {/* <TimelineItem onClick={() => jumpTo(props.steps.length)}>
                 <TimelineSeparator>
                     <TimelineDot color={getColor(props.steps.length)} />
                 </TimelineSeparator>
-                <TimelineContent>LOCATE MY FUNDS</TimelineContent>
-            </TimelineItem>
+                <TimelineContent className="timeline-item-content">LOCATE MY FUNDS</TimelineContent>
+            </TimelineItem> */}
         </Timeline>
     )
 }

@@ -19,7 +19,7 @@ let refresh: Refresh[] = []
 
 const NEAR = new Logic()
 
-export const steps: string[] = ["old position", "convert", "new position", "profit"]
+export const steps: string[] = ["old position", "convert", "new position", "profit", "locate my funds"]
 
 export function getContent(page: number): ReactNode | null {
     switch (page) {

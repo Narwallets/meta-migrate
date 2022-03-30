@@ -15,6 +15,7 @@ export default function WalletComponent() {
 
     return (
         <Button
+            className="username-container"
             variant="outlined"
             sx={{
                 mr: 5,

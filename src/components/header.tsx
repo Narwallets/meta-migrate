@@ -5,17 +5,14 @@ import { NavLink } from "react-router-dom"
 export default function Header() {
     return (
         <Grid
+            className="header"
             sx={{
                 m: 4,
-                position: "absolute",
-                left: 0,
-                right: 0,
-                zIndex: 1
             }}
         >
             <header>
                 <NavLink to={"/"}>
-                    <img src={RecipesLogo} alt=""></img>
+                    <img className="logo" src={RecipesLogo} alt=""></img>
                 </NavLink>
                 <Box className="back" component="span" justifyContent="flex-end">
                     <Button

@@ -11,6 +11,8 @@ export function jumpTo(page: number): void {
     window.updateApp()
 }
 
+let firstTime = true
+
 window.onload = () => {
     const url = new URL(window.location.href)
     const page = url.searchParams.get("p") ?? "0"
