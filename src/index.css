@@ -73,9 +73,9 @@ html {
 
 @media only screen and (max-width: 1050px) {
     .recipe-container {
-        width: 80%!important;
-        height: 170px!important;
-        min-height: fit-content!important;
+        width: 80% !important;
+        height: 170px !important;
+        min-height: fit-content !important;
         font-size: 1.7rem;
     }
 
@@ -173,7 +173,7 @@ html {
 
     button.username-container {
         font-size: 30px !important;
-        width: fit-content!important;
+        width: fit-content !important;
     }
 
     .lp-balance-container {

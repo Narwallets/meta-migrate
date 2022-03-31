@@ -35,13 +35,13 @@ const InputComponent = (props: {
                     : {
                           pattern: pattern
                       }),
-                     style: {
-                         fontSize: "1.5rem",
-                         height: "50px"
-                     }
+                style: {
+                    fontSize: "1.5rem",
+                    height: "50px"
+                }
             }}
             InputLabelProps={{
-                shrink: true,
+                shrink: true
             }}
             value={unmatched}
             error={error}

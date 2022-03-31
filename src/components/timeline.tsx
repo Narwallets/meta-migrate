@@ -32,7 +32,7 @@ export default function TimelineComponent(props: { steps: string[] }) {
             position="left"
         >
             {props.steps.map((s, i) => (
-                <TimelineItem className={`timeline-item steps${props.steps.length}` } onClick={() => jumpTo(i)}>
+                <TimelineItem className={`timeline-item steps${props.steps.length}`} onClick={() => jumpTo(i)}>
                     <TimelineSeparator className="timeline-item-separator">
                         <TimelineDot className="timeline-item-dot" color={getColor(i)} />
                         {i < props.steps.length - 2 ? <TimelineConnector className="timeline-item-conector" /> : <></>}

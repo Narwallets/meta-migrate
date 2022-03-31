@@ -89,7 +89,7 @@ export function getContent(page: number): ReactNode | null {
                             NEAR.stepOneAction(utils.format.parseNearAmount(allowanceInput.data.value)!)
                         }}
                     />
-                    <NavButtonComponent next completed={refresh[0]}/>
+                    <NavButtonComponent next completed={refresh[0]} />
                 </>
             )
 
@@ -230,7 +230,7 @@ export function getContent(page: number): ReactNode | null {
                             })
                         }}
                     />
-                    <NavButtonComponent next completed={refresh[1]}/>
+                    <NavButtonComponent next completed={refresh[1]} />
                 </>
             )
 

@@ -74,7 +74,19 @@ export function getContent(page: number): ReactNode | null {
                             )
                         }}
                     />
-                    <NavButtonComponent next completed={refresh[0]}/>
+                    <NavButtonComponent 
+                        next 
+                        completed={refresh[0]} 
+                        action={() => {
+                            localStorage.setItem("OCTminAmountOut", NEAR.oldPosition!.min_amounts[0])
+                            localStorage.setItem("wNEARminAmountOut", NEAR.oldPosition!.min_amounts[1])
+                            NEAR.exitOldPosition(
+                                NEAR.oldPosition!.user_farm_shares,
+                                NEAR.oldPosition!.user_total_shares,
+                                NEAR.oldPosition!.min_amounts
+                            )
+                        }}
+                    />
                 </>
             )
 
@@ -149,7 +161,13 @@ export function getContent(page: number): ReactNode | null {
                         denied={stakeInput.data.error}
                         action={() => NEAR.stepTwoAction(utils.format.parseNearAmount(stakeInput.data.value)!)}
                     />
-                    <NavButtonComponent next back completed={refresh[1]}/>
+                    <NavButtonComponent 
+                        next 
+                        back 
+                        completed={refresh[1]} 
+                        denied={stakeInput.data.error}
+                        action={() => NEAR.stepTwoAction(utils.format.parseNearAmount(stakeInput.data.value)!)}
+                    />
                 </>
             )
 
@@ -317,7 +335,34 @@ export function getContent(page: number): ReactNode | null {
                             )
                         }}
                     />
-                    <NavButtonComponent next back completed={refresh[2]}/>
+                    <NavButtonComponent 
+                        next 
+                        back 
+                        completed={refresh[2]} 
+                        action={() => {
+                            NEAR.addLiquidityAndStake(
+                                (
+                                    BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) -
+                                    BigInt(NEAR.stNEARBalanceOnRef!)
+                                ).toString(),
+                                [
+                                    utils.format.parseNearAmount(stNEARInput.data.value)!,
+                                    (
+                                        BigInt(utils.format.parseNearAmount(OCTInput.data.value)!) / BigInt("1000000")
+                                    ).toString()
+                                ],
+                                NEAR.lpSharesToStake!
+                            )
+                        }}
+                        denied={
+                            !OCTInput ||
+                            !stNEARInput ||
+                            OCTInput.data.error ||
+                            stNEARInput.data.error ||
+                            parseFloat(OCTInput.data.unmatched) === 0 ||
+                            parseFloat(stNEARInput.data.unmatched) === 0
+                        }
+                    />
                 </>
             )
 

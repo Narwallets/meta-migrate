@@ -41,27 +41,25 @@ export default function NavButtonComponent(props: {
             ) : (
                 <div></div>
             )}
-            
 
             <div>
-                {/*props.status &&*/ props.completed !== undefined ? (
-                    <Button
-                        variant="contained"
-                        sx={{
-                            borderRadius: "100px",
-                            mr: ".75em"
-                        }}
-                        disabled={
-                            props.completed.getResult() !== undefined ||
-                            props.denied
-                        }
-                        onClick={props?.action}
-                    >
-                        {getState(props.completed.getResult(), props.denied)}
-                    </Button>
-                ) : (
-                    <div></div>
-                )}
+                {
+                    /*props.status &&*/ props.completed !== undefined ? (
+                        <Button
+                            variant="contained"
+                            sx={{
+                                borderRadius: "100px",
+                                mr: ".75em"
+                            }}
+                            disabled={props.completed.getResult() === undefined || props.completed.getResult() || props.denied}
+                            onClick={props?.action}
+                        >
+                            {getState(props.completed.getResult(), props.denied)}
+                        </Button>
+                    ) : (
+                        <div></div>
+                    )
+                }
 
                 {props.next ? (
                     <Button

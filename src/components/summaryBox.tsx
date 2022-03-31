@@ -30,27 +30,17 @@ export default function SummaryBox() {
         getPercentage()
     }, [percentage])
     return (
-        <Grid
-            className="title"
-        >
-            <Box className="main-title">
-                Go from 0% to {(11 + percentage).toFixed(2)}% APY
-            </Box>
+        <Grid className="title">
+            <Box className="main-title">Go from 0% to {(11 + percentage).toFixed(2)}% APY</Box>
             <Box className="secondary-title">
                 <Box>Get now 11% by stNEAR and </Box>
                 <Box>{percentage}% extra in the Farm!</Box>
             </Box>
             <Box component="span">
-                <Box
-                    className="tertiary-title"
-                    component="span"
-                >
+                <Box className="tertiary-title" component="span">
                     The Octopus’ new Farm!{" "}
                 </Box>
-                <Box
-                    className="oct-logo"
-                    component="span"
-                >
+                <Box className="oct-logo" component="span">
                     <img className="octopus-logo" src={OctopusLogo} alt=""></img>
                 </Box>
             </Box>

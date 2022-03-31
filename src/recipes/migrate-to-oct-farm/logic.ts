@@ -52,6 +52,7 @@ export default class Logic extends BaseLogic {
     // get user stNEAR balance on Ref-finance
     async getOctBalanceOnRef(): Promise<string> {
         const balances: string[] = await this.getTokenBalancesOnRef([this.ADDRESS_OCT])
+        console.log(`Balance OCT: ${balances}`)
         return balances[0]
     }
 

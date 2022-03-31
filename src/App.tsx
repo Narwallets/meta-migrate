@@ -94,11 +94,13 @@ export function RecipePage() {
             {page === 0 && params.recipeId === "1" ? <SummaryBox /> : <></>}
             <Grid
                 container
-                sx={{
-                    // width: 1,
-                    // height: 1,
-                    // flex: "1 1 0"
-                }}
+                sx={
+                    {
+                        // width: 1,
+                        // height: 1,
+                        // flex: "1 1 0"
+                    }
+                }
                 className="main-container timeline-container"
                 direction="row"
                 justifyContent="center"
@@ -135,7 +137,12 @@ export function RecipePage() {
                     }}
                 >
                     <Paper
-                        className={"secondary-container-h" + (getPage() == recipes[parseInt(params.recipeId!)].steps.length - 1 ? " secondary-container-h-last" : "")}
+                        className={
+                            "secondary-container-h" +
+                            (getPage() == recipes[parseInt(params.recipeId!)].steps.length - 1
+                                ? " secondary-container-h-last"
+                                : "")
+                        }
                         sx={{
                             width: 1,
                             display: "flex",
