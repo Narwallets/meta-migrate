@@ -238,7 +238,7 @@ export function getContent(page: number): ReactNode | null {
             // Define Inputs
             // -
             // Define Refresh
-            refresh[3] ??= new Refresh(
+            refresh[2] ??= new Refresh(
                 () =>
                     NEAR.getFarmingStake(NEAR.STNEAR_WNEAR_POOL_ID).then(res => {
                         NEAR.farmShares = res
@@ -263,7 +263,7 @@ export function getContent(page: number): ReactNode | null {
             // Define Inputs
             // -
             // Define Refresh
-            refresh[4] ??= new Refresh(
+            refresh[3] ??= new Refresh(
                 () =>
                     Promise.all([
                         NEAR.getTokenBalancesOnRef([NEAR.ADDRESS_METAPOOL, NEAR.ADDRESS_WNEAR]),
@@ -320,7 +320,7 @@ export function getContent(page: number): ReactNode | null {
                 },
                 {
                     location: "stNEAR <-> wNEAR Pool",
-                    link: `https://app.ref.finance/pool/${NEAR.NEW_POOL_ID}`,
+                    link: `https://app.ref.finance/pool/${NEAR.STNEAR_WNEAR_POOL_ID}`,
                     amount: NEAR?.poolShares,
                     unit: "LP"
                 },
