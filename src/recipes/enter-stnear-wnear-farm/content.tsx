@@ -163,7 +163,7 @@ export function getContent(page: number): ReactNode | null {
                         title={"Provide LP and stake."}
                         description={
                             <Description>
-                                Provided your tokens as liquidity in the stNEAR {"<->"} wNEAR pool and {""}
+                                Provide your tokens as liquidity in the stNEAR {"<->"} wNEAR pool and {""}
                                 put your LP Shares into the stNEAR {"<->"} wNEAR farm. {""}
                                 <LineSpacing />
                                 You currently have <Purple>{stNEARBalance}</Purple>&nbsp;$stNEAR and {""}
