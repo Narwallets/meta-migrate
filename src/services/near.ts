@@ -566,11 +566,9 @@ export default class BaseLogic {
      * @param token token address
      */
     async getTokenBalance(tokenAddress: string): Promise<string> {
-        const balance: any = await window.account.viewFunction(
-            tokenAddress,
-            "ft_balance_of",
-            { account_id: window.account.accountId }
-        )
+        const balance: any = await window.account.viewFunction(tokenAddress, "ft_balance_of", {
+            account_id: window.account.accountId
+        })
 
         return balance
     }

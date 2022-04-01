@@ -89,9 +89,9 @@ export function getContent(page: number): ReactNode | null {
                             NEAR.stepOneAction(utils.format.parseNearAmount(allowanceInput.data.value)!)
                         }}
                     />
-                    <NavButtonComponent 
-                        next 
-                        completed={refresh[0]} 
+                    <NavButtonComponent
+                        next
+                        completed={refresh[0]}
                         action={() => {
                             NEAR.stepOneAction(utils.format.parseNearAmount(allowanceInput.data.value)!)
                         }}
@@ -239,9 +239,9 @@ export function getContent(page: number): ReactNode | null {
                             })
                         }}
                     />
-                    <NavButtonComponent 
-                        next 
-                        completed={refresh[1]} 
+                    <NavButtonComponent
+                        next
+                        completed={refresh[1]}
                         denied={
                             !wNEARInput ||
                             !stNEARInput ||
@@ -365,7 +365,8 @@ export function getContent(page: number): ReactNode | null {
 }
 
 export function APY() {
-    const [percentage, setPercentage] = useState("...")
+    const [percentage, setPercentage] = useState(0)
+    const [percentageStNear, setPercentageStNear] = useState(0)
     useEffect(() => {
         async function getPercentage() {
             let percentage = (await getFarmAPR())?.ref_wnear_st_near_apr
@@ -374,7 +375,15 @@ export function APY() {
             }
             setPercentage(percentage)
         }
+        async function getPercentageStNear() {
+            let percentage = (await getFarmAPR())?.st_near_30_day_apy
+            if (isNaN(percentage) || percentage === 0) {
+                percentage = 0
+            }
+            setPercentageStNear(percentage)
+        }
         getPercentage()
+        getPercentageStNear()
     }, [percentage])
-    return <span>{percentage !== "..." ? Math.round(Number(percentage)) + "%" : "..."}</span>
+    return <span>{percentage !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
 }

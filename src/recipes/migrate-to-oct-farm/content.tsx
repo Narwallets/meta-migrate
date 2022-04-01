@@ -176,7 +176,7 @@ export function getContent(page: number): ReactNode | null {
             if (NEAR.newPoolInfo !== undefined) {
                 const values = getMaxInvest(
                     [
-                        (/*BigInt(NEAR.stNEARBalanceOnRef!) + */BigInt(NEAR.stNEARBalance!)).toString(),
+                        /*BigInt(NEAR.stNEARBalanceOnRef!) + */ BigInt(NEAR.stNEARBalance!).toString(),
                         NEAR.OCTBalanceOnRef!
                     ],
                     NEAR.newPoolInfo.amounts
@@ -328,9 +328,7 @@ export function getContent(page: number): ReactNode | null {
                                 //     BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) -
                                 //     BigInt(NEAR.stNEARBalanceOnRef!)
                                 // ).toString(),
-                                (
-                                    BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!)
-                                ).toString(),
+                                BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!).toString(),
                                 [
                                     utils.format.parseNearAmount(stNEARInput.data.value)!,
                                     (
@@ -351,9 +349,7 @@ export function getContent(page: number): ReactNode | null {
                                 //     BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) -
                                 //     BigInt(NEAR.stNEARBalanceOnRef!)
                                 // ).toString(),
-                                (
-                                    BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) 
-                                ).toString(),
+                                BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!).toString(),
                                 [
                                     utils.format.parseNearAmount(stNEARInput.data.value)!,
                                     (
@@ -496,16 +492,25 @@ export function getContent(page: number): ReactNode | null {
 }
 
 export function APY() {
-    const [percentage, setPercentage] = useState("...")
+    const [percentage, setPercentage] = useState(0)
+    const [percentageStNear, setPercentageStNear] = useState(0)
     useEffect(() => {
         async function getPercentage() {
             let percentage = (await getFarmAPR())?.ref_oct_st_near_apr
             if (isNaN(percentage) || percentage === 0) {
-                percentage = "..."
+                percentage = 0
             }
             setPercentage(percentage)
         }
+        async function getPercentageStNear() {
+            let percentage = (await getFarmAPR())?.st_near_30_day_apy
+            if (isNaN(percentage) || percentage === 0) {
+                percentage = 0
+            }
+            setPercentageStNear(percentage)
+        }
         getPercentage()
-    }, [percentage])
-    return <span>{percentage !== "..." ? Math.round(Number(percentage)) + "%" : "..."}</span>
+        getPercentageStNear()
+    }, [percentage, percentageStNear])
+    return <span>{percentage !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
 }

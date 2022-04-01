@@ -182,6 +182,6 @@ export function APY() {
         }
         getPercentage()
     }, [percentage])
-    
+
     return <span>{percentage !== "..." ? Math.round(Number(percentage)) + "%" : "..."}</span>
 }

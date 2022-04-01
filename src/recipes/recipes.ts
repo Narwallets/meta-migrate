@@ -10,11 +10,9 @@ type recipe = {
     comingsoon?: boolean
     apy: () => ReactNode | null
     content: (page: number) => ReactNode | null
-    steps: string[],
+    steps: string[]
     order: number
 }
-
-
 
 const recipes: recipe[] = [
     {
@@ -49,7 +47,7 @@ const recipes: recipe[] = [
 
 export let recipesSorted: recipe[] = []
 
-for(let recipe of recipes) {
+for (let recipe of recipes) {
     recipesSorted.push(recipe)
 }
 

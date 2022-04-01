@@ -100,7 +100,7 @@ export default class Logic extends BaseLogic {
         const octActions: nearAPI.transactions.Action[] = []
         // use this for actions related to LP
         const refActions_2: nearAPI.transactions.Action[] = []
-        // Ref changed and doesn't hold more tokens. This function should 
+        // Ref changed and doesn't hold more tokens. This function should
         // stop receiving amount_stnear as parameter
         console.log(`1: ${amount_stnear}`)
         console.log(`2: ${lp_amounts[0]}`)
