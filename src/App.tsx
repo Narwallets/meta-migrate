@@ -10,7 +10,7 @@ import BaseLogic from "./services/near"
 import { getPage } from "./utils/navigation"
 import { NavLink, Outlet, useParams } from "react-router-dom"
 import PageComponent from "./components/page"
-import { recipes } from "./recipes/recipes"
+import { recipes, recipesSorted } from "./recipes/recipes"
 
 declare module "@mui/material/styles/createPalette" {
     interface Palette {
@@ -176,7 +176,7 @@ export function CatalogPage() {
             alignItems="center"
             wrap="nowrap"
         >
-            {recipes.map(r => (
+            {recipesSorted.map(r => (
                 <Paper
                     className="recipe-container"
                     sx={{

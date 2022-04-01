@@ -551,13 +551,28 @@ export default class BaseLogic {
             "get_deposits",
             { account_id: window.account.accountId }
         )
-        
+
         console.log(`Ref balances: ${JSON.stringify(refBalances)}`)
         const balances: string[] = tokens.map(token => {
             return refBalances[token] ? refBalances[token] : "0"
         })
 
         return balances
+    }
+
+    /**
+     * query user's balance of fungible token
+     *
+     * @param token token address
+     */
+    async getTokenBalance(tokenAddress: string): Promise<string> {
+        const balance: any = await window.account.viewFunction(
+            tokenAddress,
+            "ft_balance_of",
+            { account_id: window.account.accountId }
+        )
+
+        return balance
     }
 
     /**

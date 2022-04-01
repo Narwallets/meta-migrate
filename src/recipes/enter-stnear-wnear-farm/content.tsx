@@ -89,7 +89,14 @@ export function getContent(page: number): ReactNode | null {
                             NEAR.stepOneAction(utils.format.parseNearAmount(allowanceInput.data.value)!)
                         }}
                     />
-                    <NavButtonComponent next completed={refresh[0]} />
+                    <NavButtonComponent 
+                        next 
+                        completed={refresh[0]} 
+                        action={() => {
+                            NEAR.stepOneAction(utils.format.parseNearAmount(allowanceInput.data.value)!)
+                        }}
+                        denied={allowanceInput?.data.error}
+                    />
                 </>
             )
 
@@ -185,6 +192,7 @@ export function getContent(page: number): ReactNode | null {
                                                     )) /
                                                 10000000000
                                             ).toFixed(5) // TODO: check if final pool is [wNEAR, stNEAR] or [stNEAR, wNEAR]
+                                            wNEARInput.data.value = wNEARInput.data.unmatched
                                         }
                                     }}
                                 />
@@ -205,6 +213,7 @@ export function getContent(page: number): ReactNode | null {
                                                 ) /
                                                     10000000000)
                                             ).toFixed(5) // TODO: check if final pool is [wNEAR, stNEAR] or [stNEAR, wNEAR]
+                                            stNEARInput.data.value = stNEARInput.data.unmatched
                                         }
                                     }}
                                 />
@@ -230,7 +239,24 @@ export function getContent(page: number): ReactNode | null {
                             })
                         }}
                     />
-                    <NavButtonComponent next completed={refresh[1]} />
+                    <NavButtonComponent 
+                        next 
+                        completed={refresh[1]} 
+                        denied={
+                            !wNEARInput ||
+                            !stNEARInput ||
+                            wNEARInput.data.error ||
+                            stNEARInput.data.error ||
+                            parseFloat(wNEARInput.data.unmatched) === 0 ||
+                            parseFloat(stNEARInput.data.unmatched) === 0
+                        }
+                        action={() => {
+                            NEAR.stepTwoAction({
+                                stnearAmount: utils.format.parseNearAmount(stNEARInput.data.value)!,
+                                wnearAmount: utils.format.parseNearAmount(wNEARInput.data.value)!
+                            })
+                        }}
+                    />
                 </>
             )
 

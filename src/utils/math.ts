@@ -33,6 +33,7 @@ function yton(yoctoString: string, decimals: number = 5): string {
     result = result.slice(0, -24 + decimals)
     return addCommas(result)
 }
+
 /**
  * adds commas to a string number
  * @param {string} str

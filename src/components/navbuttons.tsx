@@ -51,7 +51,9 @@ export default function NavButtonComponent(props: {
                                 borderRadius: "100px",
                                 mr: ".75em"
                             }}
-                            disabled={props.completed.getResult() === undefined || props.completed.getResult() || props.denied}
+                            disabled={
+                                props.completed.getResult() === undefined || props.completed.getResult() || props.denied
+                            }
                             onClick={props?.action}
                         >
                             {getState(props.completed.getResult(), props.denied)}

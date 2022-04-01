@@ -170,6 +170,7 @@ export function getContent(page: number): ReactNode | null {
 }
 
 export function APY() {
+    return <span>--</span>
     const [percentage, setPercentage] = useState("...")
     useEffect(() => {
         async function getPercentage() {
@@ -181,5 +182,6 @@ export function APY() {
         }
         getPercentage()
     }, [percentage])
+    
     return <span>{percentage !== "..." ? Math.round(Number(percentage)) + "%" : "..."}</span>
 }

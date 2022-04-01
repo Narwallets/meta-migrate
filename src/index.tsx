@@ -9,7 +9,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 
 ReactDOM.render(
     <React.StrictMode>
-        <BrowserRouter basename="/dapp/testnet/meta-recipes">
+        <BrowserRouter basename="/dapp/mainnet/meta-recipes">
             <Routes>
                 <Route path="/" element={<App />}>
                     <Route path="/" element={<CatalogPage />} />

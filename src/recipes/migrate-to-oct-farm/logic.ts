@@ -49,11 +49,11 @@ export default class Logic extends BaseLogic {
         return balances[0]
     }
 
-    // get user stNEAR balance on Ref-finance
+    // get user OCT balance
     async getOctBalanceOnRef(): Promise<string> {
-        const balances: string[] = await this.getTokenBalancesOnRef([this.ADDRESS_OCT])
-        console.log(`Balance OCT: ${balances}`)
-        return balances[0]
+        const balance: string = await this.getTokenBalance(this.ADDRESS_OCT)
+        console.log(`Balance OCT: ${balance}`)
+        return balance
     }
 
     getNewFarmingStake(): Promise<string> {
@@ -97,26 +97,50 @@ export default class Logic extends BaseLogic {
         const metapoolActions: nearAPI.transactions.Action[] = []
         // use this to increase storage balance on ref before depositing stNEAR
         const refActions_1: nearAPI.transactions.Action[] = []
+        const octActions: nearAPI.transactions.Action[] = []
         // use this for actions related to LP
         const refActions_2: nearAPI.transactions.Action[] = []
+        // Ref changed and doesn't hold more tokens. This function should 
+        // stop receiving amount_stnear as parameter
+        console.log(`1: ${amount_stnear}`)
+        console.log(`2: ${lp_amounts[0]}`)
+        console.log(`3: ${BigInt(lp_amounts[0]) + BigInt(amount_stnear)}`)
+        amount_stnear = lp_amounts[0]
+        const amount_oct = lp_amounts[1]
 
         // query user storage on ref
-        const storage_balance: any = await window.account.viewFunction(
-            window.nearConfig.ADDRESS_REF_EXCHANGE,
-            "storage_balance_of",
-            {
-                account_id: window.account.accountId
-            }
-        )
+        const storage_balance: any = await this.getOctBalanceOnRef()
+        // const storage_balance: any = await window.account.viewFunction(
+        //     window.nearConfig.ADDRESS_REF_EXCHANGE,
+        //     "storage_balance_of",
+        //     {
+        //         account_id: window.account.accountId
+        //     }
+        // )
 
         // check if storage is enough for a new token deposit
-        if (storage_balance === null || BigInt(storage_balance.available) <= BigInt(this.MIN_DEPOSIT_PER_TOKEN)) {
-            refActions_1.push(
+        // if (storage_balance === null || BigInt(storage_balance) <= BigInt(this.MIN_DEPOSIT_PER_TOKEN)) {
+        //     refActions_1.push(
+        //         nearAPI.transactions.functionCall(
+        //             "storage_deposit", // contract method to deposit NEAR for wNEAR
+        //             {},
+        //             20_000_000_000_000, // attached gas
+        //             this.ONE_MORE_DEPOSIT_AMOUNT // amount of NEAR to deposit and wrap
+        //         )
+        //     )
+        // }
+
+        if (BigInt(amount_oct) > BigInt("0")) {
+            octActions.push(
                 nearAPI.transactions.functionCall(
-                    "storage_deposit", // contract method to deposit NEAR for wNEAR
-                    {},
-                    20_000_000_000_000, // attached gas
-                    this.ONE_MORE_DEPOSIT_AMOUNT // amount of NEAR to deposit and wrap
+                    "ft_transfer_call",
+                    {
+                        receiver_id: window.nearConfig.ADDRESS_REF_EXCHANGE,
+                        amount: amount_oct,
+                        msg: ""
+                    },
+                    150_000_000_000_000,
+                    "1" // one yocto
                 )
             )
         }
@@ -141,7 +165,7 @@ export default class Logic extends BaseLogic {
 
         // set slippage protection to 0.1%
         const min_lp_amounts: string[] = lp_amounts.map(amount => {
-            return ((BigInt(amount) * BigInt("999")) / BigInt("1000")).toString()
+            return ((BigInt(amount) * BigInt("995")) / BigInt("1000")).toString()
         })
 
         // add liquidity to $OCT <-> $stNEAR
@@ -162,6 +186,9 @@ export default class Logic extends BaseLogic {
 
         if (refActions_1.length > 0) {
             preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_EXCHANGE, refActions_1))
+        }
+        if (octActions.length > 0) {
+            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_OCT, octActions))
         }
         if (metapoolActions.length > 0) {
             preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_METAPOOL, metapoolActions))

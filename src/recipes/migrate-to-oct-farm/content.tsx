@@ -74,9 +74,9 @@ export function getContent(page: number): ReactNode | null {
                             )
                         }}
                     />
-                    <NavButtonComponent 
-                        next 
-                        completed={refresh[0]} 
+                    <NavButtonComponent
+                        next
+                        completed={refresh[0]}
                         action={() => {
                             localStorage.setItem("OCTminAmountOut", NEAR.oldPosition!.min_amounts[0])
                             localStorage.setItem("wNEARminAmountOut", NEAR.oldPosition!.min_amounts[1])
@@ -161,10 +161,10 @@ export function getContent(page: number): ReactNode | null {
                         denied={stakeInput.data.error}
                         action={() => NEAR.stepTwoAction(utils.format.parseNearAmount(stakeInput.data.value)!)}
                     />
-                    <NavButtonComponent 
-                        next 
-                        back 
-                        completed={refresh[1]} 
+                    <NavButtonComponent
+                        next
+                        back
+                        completed={refresh[1]}
                         denied={stakeInput.data.error}
                         action={() => NEAR.stepTwoAction(utils.format.parseNearAmount(stakeInput.data.value)!)}
                     />
@@ -176,7 +176,7 @@ export function getContent(page: number): ReactNode | null {
             if (NEAR.newPoolInfo !== undefined) {
                 const values = getMaxInvest(
                     [
-                        (BigInt(NEAR.stNEARBalanceOnRef!) + BigInt(NEAR.stNEARBalance!)).toString(),
+                        (/*BigInt(NEAR.stNEARBalanceOnRef!) + */BigInt(NEAR.stNEARBalance!)).toString(),
                         NEAR.OCTBalanceOnRef!
                     ],
                     NEAR.newPoolInfo.amounts
@@ -282,6 +282,7 @@ export function getContent(page: number): ReactNode | null {
                                                 ) /
                                                     10000000000)
                                             ).toFixed(5) // TODO: check if final pool is [OCT, stNEAR] or [stNEAR, OCT]
+                                            stNEARInput.data.value = stNEARInput.data.unmatched
                                         }
                                     }}
                                 />
@@ -303,6 +304,7 @@ export function getContent(page: number): ReactNode | null {
                                                     )) /
                                                 10000000000
                                             ).toFixed(5) // TODO: check if final pool is [OCT, stNEAR] or [stNEAR, OCT]
+                                            OCTInput.data.value = OCTInput.data.unmatched
                                         }
                                     }}
                                 />
@@ -319,11 +321,15 @@ export function getContent(page: number): ReactNode | null {
                             parseFloat(stNEARInput.data.unmatched) === 0
                         }
                         completed={refresh[2]}
+                        // DEPRECATED
                         action={() => {
                             NEAR.addLiquidityAndStake(
+                                // (
+                                //     BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) -
+                                //     BigInt(NEAR.stNEARBalanceOnRef!)
+                                // ).toString(),
                                 (
-                                    BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) -
-                                    BigInt(NEAR.stNEARBalanceOnRef!)
+                                    BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!)
                                 ).toString(),
                                 [
                                     utils.format.parseNearAmount(stNEARInput.data.value)!,
@@ -335,15 +341,18 @@ export function getContent(page: number): ReactNode | null {
                             )
                         }}
                     />
-                    <NavButtonComponent 
-                        next 
-                        back 
-                        completed={refresh[2]} 
+                    <NavButtonComponent
+                        next
+                        back
+                        completed={refresh[2]}
                         action={() => {
                             NEAR.addLiquidityAndStake(
+                                // (
+                                //     BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) -
+                                //     BigInt(NEAR.stNEARBalanceOnRef!)
+                                // ).toString(),
                                 (
-                                    BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) -
-                                    BigInt(NEAR.stNEARBalanceOnRef!)
+                                    BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) 
                                 ).toString(),
                                 [
                                     utils.format.parseNearAmount(stNEARInput.data.value)!,
