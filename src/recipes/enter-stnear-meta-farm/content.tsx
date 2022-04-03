@@ -9,7 +9,7 @@ import LocateComponent from "../../components/locate"
 import NavButtonComponent from "../../components/navbuttons"
 import StepComponent from "../../components/step"
 import TitleComponent from "../../components/title"
-import { getMaxInvest, yton } from "../../utils/math"
+import { bigMax, getMaxInvest, yton } from "../../utils/math"
 import Logic from "./logic"
 import { getFarmAPR } from "../../utils/apr"
 import { Box, Icon } from "@mui/material"
@@ -27,15 +27,12 @@ export const steps: string[] = ["get tokens", "enter farm", "profit"]
 export function getContent(page: number): ReactNode | null {
     switch (page) {
         case 0:
-            if (!!NEAR.stNEARPrice) {
-                NEAR.halfOfStNEARFunds = (
-                    BigInt(
-                        NEAR.estimateStnearOut(
-                            utils.format.parseNearAmount(allowanceInput?.data.value ?? "0")!,
-                            NEAR.stNEARPrice
-                        )
-                    ) / BigInt(2)
-                ).toString()
+            if (!!NEAR.stNEARPrice && !!NEAR.poolInfo) {
+                NEAR.stNEARReceived = NEAR.estimateStnearOut(
+                    utils.format.parseNearAmount(allowanceInput?.data.value ?? "0")!,
+                    NEAR.stNEARPrice
+                )
+                NEAR.stNEARToSwap = NEAR.estimateStnearIn(NEAR.stNEARReceived, NEAR.poolInfo)
             }
             // Define Inputs
             if (NEAR.minDepositAmount !== undefined && NEAR.nativeNEARBalance !== undefined)
@@ -61,33 +58,37 @@ export function getContent(page: number): ReactNode | null {
                     ]
                 })
             // Define Refresh
-            refresh[0] ??= new Refresh(
-                () =>
-                    Promise.all([
-                        NEAR.getMetapoolInfo(),
-                        NEAR.getNativeNearBalance(),
-                        NEAR.estimateMetaOut(NEAR.halfOfStNEARFunds ?? "0")
-                    ]).then(async res => {
-                        NEAR.minDepositAmount = res[0].min_deposit_amount
-                        NEAR.stNEARPrice = res[0].st_near_price
-                        NEAR.nativeNEARBalance = res[1]
-                        NEAR.METAOut = res[2]
-                        if (NEAR.halfOfStNEARFunds === undefined)
-                            NEAR.METAOut = await NEAR.estimateMetaOut((
-                                BigInt(
-                                    NEAR.estimateStnearOut(
-                                        utils.format.parseNearAmount(Math.max(Number(yton(NEAR.nativeNEARBalance!, 5)) - 5, 0).toString())!,
-                                        NEAR.stNEARPrice
-                                    )
-                                ) / BigInt(2)
-                            ).toString())
-                        return BigInt(NEAR.nativeNEARBalance) < BigInt(NEAR.minDepositAmount)
-                    })
+            refresh[0] ??= new Refresh(() =>
+                Promise.all([
+                    NEAR.getMetapoolInfo(),
+                    NEAR.getNativeNearBalance(),
+                    NEAR.estimateMetaOut(NEAR.stNEARToSwap ?? "0"),
+                    NEAR.getPoolInfo(NEAR.STNEAR_META_POOL_ID)
+                ]).then(async res => {
+                    NEAR.minDepositAmount = res[0].min_deposit_amount
+                    NEAR.stNEARPrice = res[0].st_near_price
+                    NEAR.nativeNEARBalance = res[1]
+                    NEAR.METAOut = res[2]
+                    NEAR.poolInfo = res[3]
+                    if (NEAR.stNEARToSwap === undefined) {
+                        const nearToUse: string = bigMax([
+                            (BigInt(NEAR.nativeNEARBalance) - BigInt(utils.format.parseNearAmount("5")!)).toString(),
+                            BigInt("0").toString()
+                        ])
+                        NEAR.stNEARReceived = NEAR.estimateStnearOut(nearToUse!, NEAR.stNEARPrice)
+                        const stnearToSwap: string = NEAR.estimateStnearIn(NEAR.stNEARReceived, NEAR.poolInfo)
+                        NEAR.METAOut = await NEAR.estimateMetaOut(stnearToSwap)
+                    }
+                    return BigInt(NEAR.nativeNEARBalance) < BigInt(NEAR.minDepositAmount)
+                })
             )
             // Define Values
             const balance = Loading(!!NEAR?.nativeNEARBalance, NEAR.nativeNEARBalance, s => yton(s)!)
-            const stNEAROut = Loading(!!NEAR?.stNEARPrice, NEAR.halfOfStNEARFunds, s => yton(s)!)
             const METAOut = Loading(!!NEAR?.METAOut, NEAR.METAOut, s => yton(s)!)
+            const stNEAROut =
+                NEAR.stNEARReceived !== undefined && NEAR.stNEARToSwap !== undefined
+                    ? yton((BigInt(NEAR.stNEARReceived) - BigInt(NEAR.stNEARToSwap)).toString())
+                    : "..."
             return (
                 <>
                     <TitleComponent title="NEAR -> stNEAR & META" step={1} />
@@ -107,14 +108,22 @@ export function getContent(page: number): ReactNode | null {
                                     unit="NEAR"
                                     onChange={() => {
                                         setTimeout(async () => {
-                                            if (new Date().getTime() - inputUpdated.getTime() > 400) {
+                                            if (
+                                                new Date().getTime() - inputUpdated.getTime() > 400 &&
+                                                !!NEAR.stNEARPrice &&
+                                                !!NEAR.poolInfo
+                                            ) {
+                                                NEAR.stNEARReceived = NEAR.estimateStnearOut(
+                                                    utils.format.parseNearAmount(allowanceInput?.data.value ?? "0")!,
+                                                    NEAR.stNEARPrice
+                                                )
                                                 NEAR.METAOut = await NEAR.estimateMetaOut(
-                                                    utils.format.parseNearAmount(allowanceInput?.data.value ?? "0")!
+                                                    NEAR.estimateStnearIn(NEAR.stNEARReceived, NEAR.poolInfo)
                                                 )
                                                 window.updatePage()
                                             }
                                         }, 500)
-                                        NEAR.METAOut = undefined;
+                                        NEAR.METAOut = undefined
                                         inputUpdated = new Date()
                                     }}
                                 />
@@ -123,7 +132,7 @@ export function getContent(page: number): ReactNode | null {
                                 <Purple>{METAOut}</Purple>&nbsp;$META.
                             </Description>
                         }
-                        denied={allowanceInput?.data.error || !NEAR.METAOut || BigInt(NEAR.METAOut) === BigInt(0) }
+                        denied={allowanceInput?.data.error || !NEAR.METAOut || BigInt(NEAR.METAOut) === BigInt(0)}
                         completed={refresh[0]}
                         action={() => {
                             NEAR.stepOneAction({

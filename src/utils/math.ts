@@ -1,4 +1,5 @@
 const bigMin = (arr: string[]): string => arr.reduce((a: string, b: string) => (BigInt(a) < BigInt(b) ? a : b))
+const bigMax = (arr: string[]): string => arr.reduce((a: string, b: string) => (BigInt(a) > BigInt(b) ? a : b))
 
 const getMaxInvest = (available: string[], poolAmts: string[]): string[] => [
     bigMin([available[0], ((BigInt(available[1]) * BigInt(poolAmts[0])) / BigInt(poolAmts[1])).toString()]),
@@ -48,4 +49,4 @@ function addCommas(str: string) {
     return str
 }
 
-export { bigMin, getMaxInvest, yton, addCommas }
+export { bigMin, bigMax, getMaxInvest, yton, addCommas }

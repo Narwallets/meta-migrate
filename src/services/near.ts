@@ -228,6 +228,7 @@ export default class BaseLogic {
         })
     }
 
+    // TODO: update comment
     // get user LP shares in OCT<>wNEAR pool
     // IMPORTANT: after calling this function disable the associated button.
     // REASON: consider following scenario:
@@ -237,6 +238,7 @@ export default class BaseLogic {
     // 4- wallet re-direct arrives
     // => user will approve new values thinking he'll get the old values
     async getPoolInfo(poolID: number): Promise<{
+        fee: number
         user_shares: string
         total_shares: string
         pool_amounts: string[]
@@ -253,16 +255,18 @@ export default class BaseLogic {
 
         // get pool info
         const {
+            total_fee,
             amounts,
             shares_total_supply: total_shares
         }: {
+            total_fee: number
             amounts: string[]
             shares_total_supply: string
         } = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_EXCHANGE, "get_pool", {
             pool_id: poolID
         })
 
-        return { user_shares, total_shares, pool_amounts: amounts }
+        return { fee: total_fee, user_shares, total_shares, pool_amounts: amounts }
     }
 
     /**

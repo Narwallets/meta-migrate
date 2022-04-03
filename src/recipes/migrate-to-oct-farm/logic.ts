@@ -81,7 +81,6 @@ export default class Logic extends BaseLogic {
 
     /**
      * add liquidity to stNEAR<>OCT farm,
-     * TODO: use a generic addLiquidity function
      *
      * @param amount_stnear
      * @param lp_amounts

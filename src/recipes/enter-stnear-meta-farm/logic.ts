@@ -1,8 +1,12 @@
 import * as nearAPI from "near-api-js"
 import BaseLogic from "../../services/near"
+import bigSqrt from "bigint-isqrt"
 
 export default class Logic extends BaseLogic {
     STNEAR_META_POOL_ID: number = 1923 // [ 'meta-pool.near', 'meta-token.near' ]
+    // see https://github.com/ref-finance/ref-contracts/blob/02efebfdce98a1283d3c9d7eb531a932166ec95d/ref-exchange/src/utils.rs#L25
+    // example: fee = 30 means actual fee is 30 / 10_000 = 0.003 => 0.3%
+    REF_FEE_DIVISOR: number = 10_000
     ADDRESS_METAPOOL: string = window.nearConfig.ADDRESS_METAPOOL
     ADDRESS_META_TOKEN: string = window.nearConfig.ADDRESS_META_TOKEN
     nativeNEARBalance?: string
@@ -13,6 +17,7 @@ export default class Logic extends BaseLogic {
     stNEARBalanceOnRef?: string
     stNEARBalance?: string
     poolInfo?: {
+        fee: number
         user_shares: string
         total_shares: string
         pool_amounts: string[]
@@ -21,7 +26,8 @@ export default class Logic extends BaseLogic {
     poolShares?: string
     farmShares?: string
     METAOut?: string
-    halfOfStNEARFunds?: string
+    stNEARToSwap?: string
+    stNEARReceived?: string
 
     /**
      * take NEAR tokens, stake all on metapool to get stNEAR
@@ -82,7 +88,7 @@ export default class Logic extends BaseLogic {
     }
 
     async estimateMetaOut(amountIn: string): Promise<string> {
-        console.log(amountIn);
+        console.log(amountIn)
         if (BigInt(amountIn) === BigInt("0")) return "0"
 
         const amountOut: string = await this.getPoolReturn({
@@ -92,9 +98,42 @@ export default class Logic extends BaseLogic {
             token_out: this.ADDRESS_META_TOKEN
         })
 
-        // set slippage to 0.1%
-        const withSlippage = (BigInt(amountOut) * BigInt("999") / BigInt("1000")).toString()
+        // set slippage to 0.5%
+        const withSlippage = ((BigInt(amountOut) * BigInt("995")) / BigInt("1000")).toString()
         return withSlippage
     }
 
+    applyPoolFee(fee: number, input: bigint): bigint {
+        return (input * BigInt(this.REF_FEE_DIVISOR - fee)) / BigInt(this.REF_FEE_DIVISOR)
+    }
+
+    estimateStnearIn(
+        stnearTotal: string,
+        poolInfo: {
+            fee: number
+            pool_amounts: string[]
+        }
+    ): string {
+        // return (BigInt(stnearTotal) / BigInt("2")).toString()
+        const userStnear: bigint = BigInt(stnearTotal)
+        const { fee, pool_amounts } = poolInfo
+        const [rStnearStr, rMetaStr]: string[] = pool_amounts
+        // stNEAR pool reserve
+        const rStnear: bigint = BigInt(rStnearStr)
+        // META pool reserve
+        const rMeta: bigint = BigInt(rMetaStr)
+        // pool constant from x * y = k
+        const k: bigint = rStnear * rMeta
+
+        const term_1: bigint = this.applyPoolFee(fee, k) + k
+        const term_2: bigint = bigSqrt(
+            k * k +
+                this.applyPoolFee(fee, BigInt("2") * k * k) +
+                (k * k * BigInt((this.REF_FEE_DIVISOR - fee) ** 2)) / BigInt(this.REF_FEE_DIVISOR ** 2) +
+                this.applyPoolFee(fee, BigInt("4") * rMeta * userStnear * k)
+        )
+        const term_3: bigint = this.applyPoolFee(fee, BigInt("2") * rMeta)
+
+        return (-(term_1 - term_2) / term_3).toString()
+    }
 }
