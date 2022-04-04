@@ -17,8 +17,7 @@ const recipes: recipe[] = [
     {
         id: 0,
         title: "Enter stNEAR <-> META farm",
-        description: "Soooon [̲̅$̲̅(̲̅ ͡° ͜ʖ ͡°̲̅)̲̅$̲̅]",
-        comingsoon: true,
+        description: "Two clicks to start farming!",
         apy: EnterStNEARMETAFarm.APY,
         content: EnterStNEARMETAFarm.getContent,
         steps: EnterStNEARMETAFarm.steps
@@ -34,7 +33,7 @@ const recipes: recipe[] = [
     {
         id: 2,
         title: "Enter stNEAR <-> wNEAR farm",
-        description: "One click to start farming!",
+        description: "Two clicks to start farming!",
         apy: EnterStNEARWNEARFarm.APY,
         content: EnterStNEARWNEARFarm.getContent,
         steps: EnterStNEARWNEARFarm.steps

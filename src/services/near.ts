@@ -3,6 +3,7 @@ import "regenerator-runtime/runtime"
 import * as nearAPI from "near-api-js"
 import { baseDecode } from "borsh"
 import { getConfig } from "./nearConfig"
+import { SwapAction } from "./ref-finance"
 
 declare global {
     interface Window {
@@ -23,8 +24,8 @@ declare global {
 window.nearConfig = getConfig("mainnet")
 
 export default class BaseLogic {
-    OLD_POOL_ID = 47 // ['f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near', 'wrap.near']
-    NEW_POOL_ID = 1889 // ["meta-pool.near","f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near"]
+    OLD_POOL_ID = 47 // ['f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near', 'wrap.near'] (OCT, wNEAR)
+    NEW_POOL_ID = 1889 // ["meta-pool.near","f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near"] (stNEAR, OCT)
     SIMPLE_POOL_SHARE_DECIMALS = 24
     FARM_STORAGE_BALANCE: string = nearAPI.utils.format.parseNearAmount("0.045") as string
     MIN_DEPOSIT_PER_TOKEN: string = nearAPI.utils.format.parseNearAmount("0.005") as string
@@ -77,7 +78,7 @@ export default class BaseLogic {
 
         const user_total_shares = (BigInt(user_farm_shares) + BigInt(pool_info.user_shares)).toString()
 
-        const min_amounts = this.calcMinAmountsOut(user_total_shares, pool_info.total_shares, pool_info.amounts)
+        const min_amounts = this.calcMinLPAmountsOut(user_total_shares, pool_info.total_shares, pool_info.pool_amounts)
 
         return {
             user_total_shares,
@@ -219,7 +220,7 @@ export default class BaseLogic {
     }
 
     // TEMP generalized
-    calcMinAmountsOut(user_shares: string, total_shares: string, amounts: string[]): string[] {
+    calcMinLPAmountsOut(user_shares: string, total_shares: string, amounts: string[]): string[] {
         return amounts.map(amount => {
             let exact_amount = (BigInt(amount) * BigInt(user_shares)) / BigInt(total_shares)
             // add 0.1% slippage tolerance
@@ -227,6 +228,7 @@ export default class BaseLogic {
         })
     }
 
+    // TODO: update comment
     // get user LP shares in OCT<>wNEAR pool
     // IMPORTANT: after calling this function disable the associated button.
     // REASON: consider following scenario:
@@ -236,9 +238,10 @@ export default class BaseLogic {
     // 4- wallet re-direct arrives
     // => user will approve new values thinking he'll get the old values
     async getPoolInfo(poolID: number): Promise<{
+        fee: number
         user_shares: string
         total_shares: string
-        amounts: string[]
+        pool_amounts: string[]
     }> {
         // get user shares
         const user_shares: string = await window.account.viewFunction(
@@ -252,16 +255,38 @@ export default class BaseLogic {
 
         // get pool info
         const {
+            total_fee,
             amounts,
             shares_total_supply: total_shares
         }: {
+            total_fee: number
             amounts: string[]
             shares_total_supply: string
         } = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_EXCHANGE, "get_pool", {
             pool_id: poolID
         })
 
-        return { user_shares, total_shares, amounts }
+        return { fee: total_fee, user_shares, total_shares, pool_amounts: amounts }
+    }
+
+    /**
+     * Given specific pool, returns amount of token_out recevied swapping amount_in of token_in.
+     *
+     * @param params
+     */
+    async getPoolReturn(params: {
+        pool_id: number
+        token_in: string
+        amount_in: string
+        token_out: string
+    }): Promise<string> {
+        const amount: string = await window.account.viewFunction(
+            window.nearConfig.ADDRESS_REF_EXCHANGE,
+            "get_return",
+            params
+        )
+
+        return amount
     }
 
     /**
@@ -284,9 +309,9 @@ export default class BaseLogic {
             // current position info
             const { pool_id, amounts } = positions[i]
 
-            // set slippage protection to 0.5%
+            // set slippage protection to 0.1%
             const min_lp_amounts: string[] = amounts.map(amount => {
-                return ((BigInt(amount) * BigInt("995")) / BigInt("1000")).toString()
+                return ((BigInt(amount) * BigInt("999")) / BigInt("1000")).toString()
             })
 
             // add liquidity to pool
@@ -310,6 +335,62 @@ export default class BaseLogic {
         const TXs: nearAPI.transactions.Transaction[] = await Promise.all(preTXs)
 
         return TXs
+    }
+
+    /**
+     * perform one swap action on ref-finance using instant-swap
+     * for info on instant-swap, see:
+     * https://github.com/ref-finance/ref-contracts/blob/22099fa4476f1d6dd94573063307783902568d63/ref-exchange/src/token_receiver.rs#L63
+     *
+     * @param swap_action
+     */
+    async instantSwap(swap_action: SwapAction): Promise<nearAPI.transactions.Transaction[]> {
+        const preTXs: Promise<nearAPI.transactions.Transaction>[] = []
+        // use for swapping
+        const tokenInActions: nearAPI.transactions.Action[] = []
+        // use to pay for storage if needed
+        const tokenOutActions: nearAPI.transactions.Action[] = []
+
+        // query user storage balance on ref contract
+        const tokenOutStorage: any = await window.account.viewFunction(swap_action.token_out, "storage_balance_of", {
+            account_id: window.account.accountId
+        })
+        if (!tokenOutStorage || BigInt(tokenOutStorage.total) <= BigInt("0")) {
+            tokenOutActions.push(
+                nearAPI.transactions.functionCall(
+                    "storage_deposit",
+                    {},
+                    30_000_000_000_000,
+                    this.NEW_ACCOUNT_STORAGE_COST
+                )
+            )
+        }
+
+        // swap
+        tokenInActions.push(
+            nearAPI.transactions.functionCall(
+                "ft_transfer_call",
+                {
+                    receiver_id: window.nearConfig.ADDRESS_REF_EXCHANGE,
+                    amount: swap_action.amount_in,
+                    msg: JSON.stringify({
+                        force: 0,
+                        actions: [swap_action]
+                    })
+                },
+                180_000_000_000_000,
+                "1" // one yocto
+            )
+        )
+
+        // only add storage transaction if needed
+        if (tokenOutActions.length > 0) {
+            preTXs.push(this.makeTransaction(swap_action.token_out, tokenOutActions))
+        }
+
+        preTXs.push(this.makeTransaction(swap_action.token_in, tokenInActions))
+
+        return await Promise.all(preTXs)
     }
 
     // remove liquidity from OCT<>wNEAR pool
@@ -521,29 +602,41 @@ export default class BaseLogic {
         }
     }
 
-    // get user stNEAR on metapool
-    async getStnearBalance(): Promise<string> {
-        const balance: string = await window.account.viewFunction(window.nearConfig.ADDRESS_METAPOOL, "ft_balance_of", {
-            account_id: window.account.accountId
-        })
-        return balance
+    /**
+     * query user balance of multiple fungible tokens
+     *
+     * @param tokens token addresses
+     */
+    async getTokenBalances(tokens: string[]): Promise<string[]> {
+        const balances: string[] = await Promise.all(
+            tokens.map(async token => {
+                // query user balance of token
+                const balance: string = await window.account.viewFunction(token, "ft_balance_of", {
+                    account_id: window.account.accountId
+                })
+                return balance
+            })
+        )
+
+        return balances
     }
 
-    // get user stNEAR balance on Ref-finance
-    async getStnearBalanceOnRef(): Promise<string> {
-        const balance = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_EXCHANGE, "get_deposits", {
-            account_id: window.account.accountId
+    /**
+     * query user's Ref deposits of multiple fungible tokens
+     *
+     * @param tokens token addresses
+     */
+    async getTokenBalancesOnRef(tokens: string[]): Promise<string[]> {
+        const refBalances: any = await window.account.viewFunction(
+            window.nearConfig.ADDRESS_REF_EXCHANGE,
+            "get_deposits",
+            { account_id: window.account.accountId }
+        )
+        const balances: string[] = tokens.map(token => {
+            return refBalances[token] ? refBalances[token] : "0"
         })
-        return balance[window.nearConfig.ADDRESS_METAPOOL] ? balance[window.nearConfig.ADDRESS_METAPOOL] : "0"
-    }
 
-    // get user stNEAR balance on Ref-finance
-    async getOctBalanceOnRef(): Promise<string> {
-        const balance = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_EXCHANGE, "get_deposits", {
-            account_id: window.account.accountId
-        })
-        console.log("Balance: ", window.nearConfig.ADDRESS_REF_EXCHANGE)
-        return balance[window.nearConfig.ADDRESS_OCT] ? balance[window.nearConfig.ADDRESS_OCT] : "0"
+        return balances
     }
 
     /**

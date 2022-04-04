@@ -4,6 +4,8 @@ import BaseLogic from "../../services/near"
 export default class Logic extends BaseLogic {
     OLD_POOL_ID = 47 // ['f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near', 'wrap.near']
     NEW_POOL_ID = 1889 // ["meta-pool.near","f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near"]
+    ADDRESS_METAPOOL: string = window.nearConfig.ADDRESS_METAPOOL
+    ADDRESS_OCT: string = window.nearConfig.ADDRESS_OCT
 
     newFarmingStake?: string
     oldPosition?: {
@@ -35,6 +37,24 @@ export default class Logic extends BaseLogic {
         return this.getFarmingStake(this.OLD_POOL_ID)
     }
 
+    // get user stNEAR on metapool
+    async getStnearBalance(): Promise<string> {
+        const balances: string[] = await this.getTokenBalances([this.ADDRESS_METAPOOL])
+        return balances[0]
+    }
+
+    // get user stNEAR balance on Ref-finance
+    async getStnearBalanceOnRef(): Promise<string> {
+        const balances: string[] = await this.getTokenBalancesOnRef([this.ADDRESS_METAPOOL])
+        return balances[0]
+    }
+
+    // get user stNEAR balance on Ref-finance
+    async getOctBalanceOnRef(): Promise<string> {
+        const balances: string[] = await this.getTokenBalancesOnRef([this.ADDRESS_OCT])
+        return balances[0]
+    }
+
     getNewFarmingStake(): Promise<string> {
         return this.getFarmingStake(this.NEW_POOL_ID)
     }
@@ -61,7 +81,6 @@ export default class Logic extends BaseLogic {
 
     /**
      * add liquidity to stNEAR<>OCT farm,
-     * TODO: use a generic addLiquidity function
      *
      * @param amount_stnear
      * @param lp_amounts

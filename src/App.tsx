@@ -162,7 +162,8 @@ export function CatalogPage() {
                 width: 1,
                 height: 1,
                 flex: "1 1 0",
-                overflowY: "scroll"
+                overflowY: "scroll",
+                mt: 20
             }}
             direction="column"
             alignItems="center"
