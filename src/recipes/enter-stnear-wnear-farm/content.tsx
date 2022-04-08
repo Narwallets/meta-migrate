@@ -184,7 +184,7 @@ export function getContent(page: number): ReactNode | null {
                                                             BigInt(NEAR.poolInfo.pool_amounts[0])
                                                     )) /
                                                 10000000000
-                                            ).toFixed(5) // TODO: check if final pool is [wNEAR, stNEAR] or [stNEAR, wNEAR]
+                                            ).toFixed(5)
                                         }
                                     }}
                                 />
@@ -204,7 +204,7 @@ export function getContent(page: number): ReactNode | null {
                                                         BigInt(NEAR.poolInfo.pool_amounts[0])
                                                 ) /
                                                     10000000000)
-                                            ).toFixed(5) // TODO: check if final pool is [wNEAR, stNEAR] or [stNEAR, wNEAR]
+                                            ).toFixed(5)
                                         }
                                     }}
                                 />

@@ -1,4 +1,3 @@
-import * as nearAPI from "near-api-js"
 import BaseLogic from "../../services/near"
 import bigSqrt from "bigint-isqrt"
 
@@ -40,10 +39,7 @@ export default class Logic extends BaseLogic {
         // recipe stakes all provided NEAR with metapool
         const amountToStake: string = near_amount
         // fetch metapool info and stNEAR<>META pool info
-        const [{ st_near_price }, { pool_amounts }] = await Promise.all([
-            this.getMetapoolInfo(),
-            this.getPoolInfo(this.STNEAR_META_POOL_ID)
-        ])
+        const { st_near_price } = await this.getMetapoolInfo()
         // get expected amount of stNEAR user gets by staking amountToStake
         const estimatedStnearAmount: string = this.estimateStnearOut(amountToStake, st_near_price, 10)
         // we'll swap half the stNEAR amount to META
@@ -134,6 +130,6 @@ export default class Logic extends BaseLogic {
         )
         const term_3: bigint = this.applyPoolFee(fee, BigInt("2") * rMeta)
 
-        return (-(term_1 - term_2) / term_3).toString()
+        return ((term_2 - term_1) / term_3).toString()
     }
 }

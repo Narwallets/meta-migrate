@@ -24,8 +24,6 @@ declare global {
 window.nearConfig = getConfig("mainnet")
 
 export default class BaseLogic {
-    OLD_POOL_ID = 47 // ['f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near', 'wrap.near'] (OCT, wNEAR)
-    NEW_POOL_ID = 1889 // ["meta-pool.near","f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near"] (stNEAR, OCT)
     SIMPLE_POOL_SHARE_DECIMALS = 24
     FARM_STORAGE_BALANCE: string = nearAPI.utils.format.parseNearAmount("0.045") as string
     MIN_DEPOSIT_PER_TOKEN: string = nearAPI.utils.format.parseNearAmount("0.005") as string
@@ -53,7 +51,12 @@ export default class BaseLogic {
         window.account = window.walletAccount.account()
     }
 
-    // TEMP generalized
+    /**
+     * get pool LP shares that the user staked on Ref farming
+     *
+     * @param pool_id
+     * @returns
+     */
     async getFarmingStake(pool_id: number): Promise<string> {
         const seeds: any = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_FARMING, "list_user_seeds", {
             account_id: window.account.accountId
@@ -61,53 +64,6 @@ export default class BaseLogic {
         return seeds[`${window.nearConfig.ADDRESS_REF_EXCHANGE}@${pool_id}`]
             ? seeds[`${window.nearConfig.ADDRESS_REF_EXCHANGE}@${pool_id}`]
             : "0"
-    }
-
-    // TEMP generalized
-    async getPosition(poolID: number): Promise<{
-        user_total_shares: string
-        user_farm_shares: string
-        user_lp_shares: string
-        total_shares: string
-        min_amounts: string[]
-    }> {
-        const [user_farm_shares, pool_info] = await Promise.all([
-            this.getFarmingStake(poolID),
-            this.getPoolInfo(poolID)
-        ])
-
-        const user_total_shares = (BigInt(user_farm_shares) + BigInt(pool_info.user_shares)).toString()
-
-        const min_amounts = this.calcMinLPAmountsOut(user_total_shares, pool_info.total_shares, pool_info.pool_amounts)
-
-        return {
-            user_total_shares,
-            user_farm_shares,
-            user_lp_shares: pool_info.user_shares,
-            total_shares: pool_info.total_shares,
-            min_amounts
-        }
-    }
-
-    async exitOldPosition(staked_amount: string, user_total_shares: string, min_amounts: string[]): Promise<void> {
-        const preTXs: Promise<nearAPI.transactions.Transaction[]>[] = []
-
-        // if user has LP shares on farm, unstake them
-        if (BigInt(staked_amount) > BigInt("0")) {
-            preTXs.push(this.farmUnstake(staked_amount, this.OLD_POOL_ID))
-        }
-        // remove liquidity from OCT <-> wNEAR pool
-        preTXs.push(this.removeLiquidityOctWnear(user_total_shares, min_amounts))
-
-        // withdraw wNEAR from Ref and unwrap it
-        preTXs.push(this.wnearToNear(min_amounts[1]))
-
-        const TXs = await Promise.all(preTXs)
-
-        window.walletAccount.requestSignTransactions({
-            transactions: TXs.flat(),
-            callbackUrl: window.location.href
-        })
     }
 
     /**
@@ -219,7 +175,14 @@ export default class BaseLogic {
         return [TX]
     }
 
-    // TEMP generalized
+    /**
+     * calculate minimum token amounts a user gets by removing LP from a pool
+     *
+     * @param user_shares LP shares owner by the user
+     * @param total_shares total LP shares in the pool
+     * @param amounts total token amounts in the pool
+     * @returns minimum token amounts user should get
+     */
     calcMinLPAmountsOut(user_shares: string, total_shares: string, amounts: string[]): string[] {
         return amounts.map(amount => {
             let exact_amount = (BigInt(amount) * BigInt(user_shares)) / BigInt(total_shares)
@@ -228,15 +191,24 @@ export default class BaseLogic {
         })
     }
 
-    // TODO: update comment
-    // get user LP shares in OCT<>wNEAR pool
-    // IMPORTANT: after calling this function disable the associated button.
-    // REASON: consider following scenario:
-    // 1- UI makes request to refresh min_amount_out
-    // 2- before response arrives, user clicks button and thinks old values will apply
-    // 3- new values arrive
-    // 4- wallet re-direct arrives
-    // => user will approve new values thinking he'll get the old values
+    /**
+     * Get pool info of a ref-finance pool
+     *
+     * IMPORTANT: after calling this function disable the associated button.
+     * REASON: consider following scenario:
+     * 1- UI makes request to refresh min_amount_out
+     * 2- before response arrives, user clicks button and thinks old values will apply
+     * 3- new values arrive
+     * 4- wallet re-direct arrives
+     * => user will approve new values thinking they will get the old values
+     *
+     * @param {number} poolID ref-finance pool ID
+     * @returns { Object } pool infos:
+     *          the pool fee
+     *          the amount of LP shares the user holds,
+     *          the total amount of LP shares there are and
+     *          the token amounts, that are in the pool
+     */
     async getPoolInfo(poolID: number): Promise<{
         fee: number
         user_shares: string
@@ -310,9 +282,9 @@ export default class BaseLogic {
             const { pool_id, amounts } = positions[i]
 
             // set slippage protection to 0.1%
-            const min_lp_amounts: string[] = amounts.map(amount => {
-                return ((BigInt(amount) * BigInt("999")) / BigInt("1000")).toString()
-            })
+            const min_lp_amounts: string[] = amounts.map(amount =>
+                ((BigInt(amount) * BigInt("999")) / BigInt("1000")).toString()
+            )
 
             // add liquidity to pool
             // no need to check for storage as storage deposit
@@ -393,148 +365,10 @@ export default class BaseLogic {
         return await Promise.all(preTXs)
     }
 
-    // remove liquidity from OCT<>wNEAR pool
-    async removeLiquidityOctWnear(
-        user_shares: string,
-        min_amounts: string[]
-    ): Promise<nearAPI.transactions.Transaction[]> {
-        const actions: nearAPI.transactions.Action[] = []
-
-        // query user storage
-        const storage_balance: any = await window.account.viewFunction(
-            window.nearConfig.ADDRESS_REF_EXCHANGE,
-            "storage_balance_of",
-            {
-                account_id: window.account.accountId
-            }
-        )
-
-        if (storage_balance === null || BigInt(storage_balance.available) <= BigInt(this.MIN_DEPOSIT_PER_TOKEN)) {
-            actions.push(
-                nearAPI.transactions.functionCall(
-                    "storage_deposit", // contract method to deposit NEAR for wNEAR
-                    {},
-                    20_000_000_000_000, // attached gas
-                    this.ONE_MORE_DEPOSIT_AMOUNT // amount of NEAR to deposit and wrap
-                )
-            )
-        }
-
-        actions.push(
-            nearAPI.transactions.functionCall(
-                "remove_liquidity",
-                {
-                    pool_id: this.OLD_POOL_ID,
-                    shares: user_shares,
-                    min_amounts: min_amounts
-                },
-                50_000_000_000_000,
-                "1" // one yocto
-            )
-        )
-
-        const TX: nearAPI.transactions.Transaction = await this.makeTransaction(
-            window.nearConfig.ADDRESS_REF_EXCHANGE,
-            actions
-        )
-
-        return [TX]
-    }
-
-    // get user wNEAR balance on Ref-finance
-    async getWnearBalanceOnRef(): Promise<string> {
-        const balance = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_EXCHANGE, "get_deposits", {
-            account_id: window.account.accountId
-        })
-        return balance[window.nearConfig.ADDRESS_WNEAR] ? balance[window.nearConfig.ADDRESS_WNEAR] : "0"
-    }
-
     // get user native NEAR balance
     async getNativeNearBalance(): Promise<string> {
         const accountBalance = await window.account.getAccountBalance()
         return accountBalance.available
-    }
-
-    // withdraw wNEAR from Ref account and unwrap it
-    async wnearToNear(wnear_amount: string): Promise<nearAPI.transactions.Transaction[]> {
-        const wNearActions_1: nearAPI.transactions.Action[] = []
-        const refActions: nearAPI.transactions.Action[] = []
-        const wNearActions_2: nearAPI.transactions.Action[] = []
-
-        // query user storage balance on ref contract
-        const refStorage: any = await window.account.viewFunction(
-            window.nearConfig.ADDRESS_REF_EXCHANGE,
-            "storage_balance_of",
-            {
-                account_id: window.account.accountId
-            }
-        )
-        if (!refStorage || BigInt(refStorage.total) <= BigInt("0")) {
-            refActions.push(
-                nearAPI.transactions.functionCall(
-                    "storage_deposit",
-                    {},
-                    30_000_000_000_000,
-                    this.ONE_MORE_DEPOSIT_AMOUNT
-                )
-            )
-        }
-        // withdraw wNEAR from Ref action
-        refActions.push(
-            nearAPI.transactions.functionCall(
-                "withdraw",
-                {
-                    token_id: window.nearConfig.ADDRESS_WNEAR,
-                    // amount: utils.format.parseNearAmount(amount),
-                    amount: wnear_amount
-                },
-                100_000_000_000_000,
-                "1" // one yocto
-            )
-        )
-
-        // query user storage balance on wNEAR contract
-        const wnearStorage: any = await window.account.viewFunction(
-            window.nearConfig.ADDRESS_WNEAR,
-            "storage_balance_of",
-            {
-                account_id: window.account.accountId
-            }
-        )
-
-        if (!wnearStorage || BigInt(wnearStorage.total) <= BigInt("0")) {
-            wNearActions_1.push(
-                nearAPI.transactions.functionCall(
-                    "storage_deposit",
-                    {},
-                    30_000_000_000_000,
-                    this.NEW_ACCOUNT_STORAGE_COST
-                )
-            )
-        }
-        // unwrap wNEAR action
-        wNearActions_2.push(
-            nearAPI.transactions.functionCall(
-                "near_withdraw",
-                {
-                    amount: wnear_amount
-                },
-                10_000_000_000_000,
-                "1" // one yocto
-            )
-        )
-
-        const preTXs: Promise<nearAPI.transactions.Transaction>[] = []
-
-        if (wNearActions_1.length > 0) {
-            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_WNEAR, wNearActions_1))
-        }
-        preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_EXCHANGE, refActions))
-        preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_WNEAR, wNearActions_2))
-
-        const TXs = await Promise.all(preTXs)
-
-        return TXs
     }
 
     // stake NEAR with metapool to get stNEAR
@@ -724,8 +558,15 @@ export default class BaseLogic {
         return TXs
     }
 
-    // estimate LP shares you get for supplying amounts
-    // see https://github.com/ref-finance/ref-contracts/blob/3c04fd20767ad7f1c383deee8e0a2b5ab47fbc18/ref-exchange/src/simple_pool.rs#L118
+    /**
+     * estimate LP shares user should get by supplying amounts
+     * see https://github.com/ref-finance/ref-contracts/blob/3c04fd20767ad7f1c383deee8e0a2b5ab47fbc18/ref-exchange/src/simple_pool.rs#L118
+     *
+     * @param pool_total_shares
+     * @param pool_amounts total token amounts on pool
+     * @param lp_amounts token amounts that user will supply
+     * @returns
+     */
     calcLpSharesFromAmounts(pool_total_shares: string, pool_amounts: string[], lp_amounts: string[]): string {
         let lp_shares_estimate: string = pool_amounts.reduce((prevValue, poolAmt, index) => {
             let currValue = (BigInt(pool_total_shares) * BigInt(lp_amounts[index])) / BigInt(poolAmt)
@@ -809,6 +650,4 @@ export default class BaseLogic {
             callbackUrl: window.location.href
         })
     }
-
-    // Loads nearAPI and this contract into window scope.
 }

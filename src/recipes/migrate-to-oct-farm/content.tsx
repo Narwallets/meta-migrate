@@ -161,7 +161,7 @@ export function getContent(page: number): ReactNode | null {
                         (BigInt(NEAR.stNEARBalanceOnRef!) + BigInt(NEAR.stNEARBalance!)).toString(),
                         NEAR.OCTBalanceOnRef!
                     ],
-                    NEAR.newPoolInfo.amounts
+                    NEAR.newPoolInfo.pool_amounts
                 )
                 OCTInput ??= new InputData({
                     value: yton(values[1] + "000000"),
@@ -202,7 +202,7 @@ export function getContent(page: number): ReactNode | null {
 
                 NEAR.lpSharesToStake = NEAR.calcLpSharesFromAmounts(
                     NEAR.newPoolInfo.total_shares,
-                    NEAR.newPoolInfo.amounts,
+                    NEAR.newPoolInfo.pool_amounts,
                     [
                         utils.format.parseNearAmount(stNEARInput.data.error ? "0" : stNEARInput.data.value ?? "0")!,
                         (
@@ -259,11 +259,11 @@ export function getContent(page: number): ReactNode | null {
                                                 (Number(
                                                     (BigInt("10000000000") *
                                                         BigInt("1000000") *
-                                                        BigInt(NEAR.newPoolInfo.amounts[1])) /
-                                                        BigInt(NEAR.newPoolInfo.amounts[0])
+                                                        BigInt(NEAR.newPoolInfo.pool_amounts[1])) /
+                                                        BigInt(NEAR.newPoolInfo.pool_amounts[0])
                                                 ) /
                                                     10000000000)
-                                            ).toFixed(5) // TODO: check if final pool is [OCT, stNEAR] or [stNEAR, OCT]
+                                            ).toFixed(5)
                                         }
                                     }}
                                 />
@@ -280,11 +280,11 @@ export function getContent(page: number): ReactNode | null {
                                                     Number(
                                                         (BigInt("10000000000") *
                                                             BigInt("1000000") *
-                                                            BigInt(NEAR.newPoolInfo.amounts[1])) /
-                                                            BigInt(NEAR.newPoolInfo.amounts[0])
+                                                            BigInt(NEAR.newPoolInfo.pool_amounts[1])) /
+                                                            BigInt(NEAR.newPoolInfo.pool_amounts[0])
                                                     )) /
                                                 10000000000
-                                            ).toFixed(5) // TODO: check if final pool is [OCT, stNEAR] or [stNEAR, OCT]
+                                            ).toFixed(5)
                                         }
                                     }}
                                 />

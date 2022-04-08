@@ -236,7 +236,7 @@ export function getContent(page: number): ReactNode | null {
                                                             BigInt(NEAR.poolInfo.pool_amounts[0])
                                                     )) /
                                                 10000000000
-                                            ).toFixed(5) // TODO: check if final pool is [META, stNEAR] or [stNEAR, META]
+                                            ).toFixed(5)
                                         }
                                     }}
                                 />
@@ -256,7 +256,7 @@ export function getContent(page: number): ReactNode | null {
                                                         BigInt(NEAR.poolInfo.pool_amounts[0])
                                                 ) /
                                                     10000000000)
-                                            ).toFixed(5) // TODO: check if final pool is [META, stNEAR] or [stNEAR, META]
+                                            ).toFixed(5)
                                         }
                                     }}
                                 />
