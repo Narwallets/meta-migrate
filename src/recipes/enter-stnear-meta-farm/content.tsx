@@ -137,6 +137,7 @@ export function getContent(page: number): ReactNode | null {
                         action={() => {
                             NEAR.stepOneAction({
                                 near_amount: utils.format.parseNearAmount(allowanceInput.data.value)!,
+                                stnear_to_swap: NEAR.stNEARToSwap!,
                                 min_meta_out: NEAR.METAOut!
                             })
                         }}

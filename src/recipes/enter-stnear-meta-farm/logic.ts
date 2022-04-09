@@ -34,23 +34,15 @@ export default class Logic extends BaseLogic {
      *
      * @param params
      */
-    async stepOneAction(params: { near_amount: string; min_meta_out: string }) {
-        const { near_amount, min_meta_out } = params
-        // recipe stakes all provided NEAR with metapool
-        const amountToStake: string = near_amount
-        // fetch metapool info and stNEAR<>META pool info
-        const { st_near_price } = await this.getMetapoolInfo()
-        // get expected amount of stNEAR user gets by staking amountToStake
-        const estimatedStnearAmount: string = this.estimateStnearOut(amountToStake, st_near_price, 10)
-        // we'll swap half the stNEAR amount to META
-        const amountToSwap: string = (BigInt(estimatedStnearAmount) / BigInt("2")).toString()
+    async stepOneAction(params: { near_amount: string; stnear_to_swap: string; min_meta_out: string }) {
+        const { near_amount, stnear_to_swap, min_meta_out } = params
 
         this.passToWallet([
-            this.nearToStnear(amountToStake),
+            this.nearToStnear(near_amount),
             this.instantSwap({
                 pool_id: this.STNEAR_META_POOL_ID,
                 token_in: this.ADDRESS_METAPOOL,
-                amount_in: amountToSwap,
+                amount_in: stnear_to_swap,
                 token_out: this.ADDRESS_META_TOKEN,
                 min_amount_out: min_meta_out
             })
