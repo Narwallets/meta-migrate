@@ -614,7 +614,8 @@ export default class BaseLogic {
         // check if user storage is enough for depositing n tokens
         if (storage_balance === null || BigInt(storage_balance.available) <= storage_needed) {
             // calculate amount to pay
-            const amountMissing: string = (storage_needed - BigInt(storage_balance.available)).toString()
+            const available: bigint = storage_balance ? BigInt(storage_balance.available) : BigInt("0")
+            const amountMissing: string = (storage_needed - available).toString()
             const amountToPay: string = this.roundUpToNearest(amountMissing, this.MIN_DEPOSIT_PER_TOKEN)
 
             refActions.push(
