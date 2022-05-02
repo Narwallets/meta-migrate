@@ -498,8 +498,12 @@ export function APY() {
     const [percentageStNear, setPercentageStNear] = useState(0)
     useEffect(() => {
         async function getPercentage() {
-            let percentage = (await getFarmAPR())?.ref_oct_st_near_apr
-            if (isNaN(percentage) || percentage === 0) {
+            const isFarmActive = await NEAR.getIsFarmActive(NEAR.NEW_POOL_ID)
+            let percentage = 0
+            if(isFarmActive) {
+                percentage = (await getFarmAPR())?.ref_oct_st_near_apr
+            }
+            if (isNaN(percentage)) {
                 percentage = 0
             }
             setPercentage(percentage)
@@ -514,5 +518,5 @@ export function APY() {
         getPercentage()
         getPercentageStNear()
     }, [percentage, percentageStNear])
-    return <span>{percentage !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
+    return <span>{percentage + percentageStNear !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
 }

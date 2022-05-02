@@ -348,7 +348,7 @@ export function getContent(page: number): ReactNode | null {
                 },
                 {
                     location: "stNEAR <-> wNEAR Pool",
-                    link: `https://app.ref.finance/pool/${NEAR.NEW_POOL_ID}`,
+                    link: `https://app.ref.finance/pool/${NEAR.STNEAR_WNEAR_POOL_ID}`,
                     amount: NEAR?.poolShares,
                     unit: "LP"
                 },
@@ -371,9 +371,14 @@ export function APY() {
     const [percentageStNear, setPercentageStNear] = useState(0)
     useEffect(() => {
         async function getPercentage() {
-            let percentage = (await getFarmAPR())?.ref_wnear_st_near_apr
-            if (isNaN(percentage) || percentage === 0) {
-                percentage = "..."
+            let percentage = 0
+            const isFarmActive = await NEAR.getIsFarmActive(NEAR.STNEAR_WNEAR_POOL_ID)
+            if(isFarmActive) {
+                percentage = (await getFarmAPR())?.ref_wnear_st_near_apr
+            }
+            console.log("BABA", percentage)
+            if (isNaN(percentage)) {
+                percentage = 0
             }
             setPercentage(percentage)
         }
@@ -386,6 +391,8 @@ export function APY() {
         }
         getPercentage()
         getPercentageStNear()
-    }, [percentage])
-    return <span>{percentage !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
+        console.log("P: ", percentage)
+        console.log("P2: ", percentageStNear)
+    }, [percentage, percentageStNear])
+    return <span>{percentage + percentageStNear !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
 }
