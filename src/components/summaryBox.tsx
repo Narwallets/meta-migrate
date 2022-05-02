@@ -46,7 +46,7 @@ export default function SummaryBox() {
     }, [percentage, percentageStNear])
     return (
         <Grid className="title">
-            <Box className="main-title">Go from 0% to {(percentageStNear/2 + percentage).toFixed(2)}% APY</Box>
+            <Box className="main-title">Go from 0% to {(percentageStNear / 2 + percentage).toFixed(2)}% APY</Box>
             <Box className="secondary-title">
                 <Box>Get now {percentageStNear}% stNEAR APY (half) and </Box>
                 <Box>{percentage}% extra in the Farm!</Box>

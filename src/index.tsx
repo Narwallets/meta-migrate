@@ -13,7 +13,7 @@ ReactDOM.render(
             <Routes>
                 <Route path="/" element={<App />}>
                     <Route path="/" element={<CatalogPage />} />
-                    <Route path=":recipeId" element={<RecipePage />} />
+                    {/* <Route path=":recipeId" element={<RecipePage />} /> */}
                 </Route>
             </Routes>
         </BrowserRouter>

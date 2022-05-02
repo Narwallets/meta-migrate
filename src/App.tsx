@@ -7,7 +7,7 @@ import { Box, Button, Grid, Icon, Paper } from "@mui/material"
 import { useReducer } from "react"
 import WalletComponent from "./components/wallet"
 import BaseLogic from "./services/near"
-import { getPage } from "./utils/navigation"
+import { getPage, getRecipe } from "./utils/navigation"
 import { NavLink, Outlet, useParams } from "react-router-dom"
 import PageComponent from "./components/page"
 import { recipes, recipesSorted } from "./recipes/recipes"
@@ -84,7 +84,12 @@ export default function App() {
 }
 
 export function RecipePage() {
-    const params = useParams()
+    let param = useParams()
+    const recipeId = getRecipe()
+    const params = {
+        ...param,
+        recipeId
+    }
     const page = getPage()
     const [, forceUpdate] = useReducer(x => x + 1, 0)
     window.updateApp = forceUpdate
@@ -162,6 +167,10 @@ export function RecipePage() {
 }
 
 export function CatalogPage() {
+    const recipeId = getRecipe()
+    if (recipeId != "") {
+        return <RecipePage />
+    }
     return (
         <Grid
             container
@@ -244,7 +253,8 @@ export function CatalogPage() {
                             COMING SOON!
                         </Button>
                     ) : (
-                        <NavLink to={`/${r.id}`} key={r.id}>
+                        // <NavLink to={`/${r.id}`} key={r.id}>
+                        <a href={`?r=${r.id}`}>
                             <Button
                                 variant="outlined"
                                 sx={{ borderRadius: "100px", position: "absolute", right: "16px", bottom: "16px" }}
@@ -252,7 +262,8 @@ export function CatalogPage() {
                             >
                                 START
                             </Button>
-                        </NavLink>
+                        </a>
+                        // </NavLink>
                     )}
                 </Paper>
             ))}

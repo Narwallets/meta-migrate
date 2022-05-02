@@ -11,9 +11,11 @@ export default function Header() {
             }}
         >
             <header>
-                <NavLink to={"/"}>
+                {/* <NavLink to={"/"}> */}
+                <a href={`${window.location.href.split("?")[0]}`}>
                     <img className="logo" src={RecipesLogo} alt=""></img>
-                </NavLink>
+                </a>
+                {/* </NavLink> */}
                 <Box className="back" component="span" justifyContent="flex-end">
                     <Button
                         variant="outlined"
