@@ -1,3 +1,4 @@
+import { NEAR_NOMINATION } from "near-api-js/lib/utils/format"
 import BaseLogic from "../../services/near"
 
 export default class Logic extends BaseLogic {
@@ -19,6 +20,7 @@ export default class Logic extends BaseLogic {
     lpSharesToStake?: string
     poolShares?: string
     farmShares?: string
+    isFarmActive?: boolean
 
     /**
      * take NEAR tokens, wrap 50% and stake 50% on metapool to get stNEAR
@@ -52,7 +54,7 @@ export default class Logic extends BaseLogic {
         // estimate received LP shares
         const lpShares: string = this.calcLpSharesFromAmounts(total_shares, pool_amounts, [stnearAmount, wnearAmount])
 
-        this.passToWallet([
+        let actions = [
             // deposit both tokens on ref-finance
             this.depositTokensOnRef([
                 { token: window.nearConfig.ADDRESS_METAPOOL, amount: stnearAmount },
@@ -60,9 +62,14 @@ export default class Logic extends BaseLogic {
             ]),
             // rovide liquidity to stNEAR<>wNEAR pool
             this.addLiquidity([{ pool_id: this.STNEAR_WNEAR_POOL_ID, amounts: [stnearAmount, wnearAmount] }]),
+        ]
+
+        if(this.isFarmActive) {
             // stake on farm
-            this.farmStake(lpShares, this.STNEAR_WNEAR_POOL_ID)
-        ])
+            actions.push(this.farmStake(lpShares, this.STNEAR_WNEAR_POOL_ID))
+        }
+
+        this.passToWallet(actions)
     }
 
     async stnearWnearFarmingStake(): Promise<string> {

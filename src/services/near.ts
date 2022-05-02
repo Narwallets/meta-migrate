@@ -3,6 +3,7 @@ import "regenerator-runtime/runtime"
 import * as nearAPI from "near-api-js"
 import { baseDecode } from "borsh"
 import { getConfig } from "./nearConfig"
+import { StringMappingType } from "typescript"
 
 declare global {
     interface Window {
@@ -744,5 +745,41 @@ export default class BaseLogic {
         })
     }
 
+    async getFarmRewardsTokens(farmId: number): Promise<FarmReward[]> {
+        const farmTokenRewards: FarmReward[] = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_FARMING, "list_farms_by_seed", {
+            seed_id: `v2.ref-finance.near@${farmId}`
+        })
+
+        return farmTokenRewards
+    }
+
+    async getIsFarmActive(farmId: number): Promise<boolean> {
+        const farmRewardTokens: FarmReward[] = await this.getFarmRewardsTokens(farmId)
+        for(let i = 0; i < farmRewardTokens.length; i++) {
+            const farmRewardToken = farmRewardTokens[i]
+            if(farmRewardToken.farm_status != "Ended") {
+                return true
+            }
+        }
+        return false
+    }
     // Loads nearAPI and this contract into window scope.
+}
+
+interface FarmReward {
+    farm_id: string;
+    farm_kind: string;
+    farm_status: string;
+    seed_id: string;
+    reward_token: string;
+    start_at: number;
+    reward_per_session: string;
+    session_interval: number;
+    total_reward: string;
+    cur_round: number;
+    last_round: number;
+    claimed_reward: string;
+    unclaimed_reward: string;
+    beneficiary_reward: string;
+
 }

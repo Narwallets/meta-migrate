@@ -150,11 +150,13 @@ export function getContent(page: number): ReactNode | null {
                 () =>
                     Promise.all([
                         NEAR.getPoolInfo(NEAR.STNEAR_WNEAR_POOL_ID),
-                        NEAR.getTokenBalances([NEAR.ADDRESS_METAPOOL, NEAR.ADDRESS_WNEAR])
+                        NEAR.getTokenBalances([NEAR.ADDRESS_METAPOOL, NEAR.ADDRESS_WNEAR]),
+                        NEAR.getIsFarmActive(NEAR.STNEAR_WNEAR_POOL_ID)
                     ]).then(res => {
                         NEAR.poolInfo = res[0]
                         NEAR.stNEARBalance = res[1][0]
                         NEAR.wNEARBalance = res[1][1]
+                        NEAR.isFarmActive = res[2]
                         return false
                     }),
                 0
@@ -165,13 +167,13 @@ export function getContent(page: number): ReactNode | null {
             const wNEARBalance = Loading(!!NEAR.wNEARBalance, NEAR.wNEARBalance, s => yton(s)!)
             return (
                 <>
-                    <TitleComponent title="Enter stNEAR <-> wNEAR farm" step={2} />
+                    <TitleComponent title={`Enter stNEAR <-> wNEAR ${NEAR.isFarmActive ? "farm" : "liquidity pool"}`} step={2} />
                     <StepComponent
-                        title={"Provide LP and stake."}
+                        title={`Provide LP ${NEAR.isFarmActive ? "and stake." : ""}`}
                         description={
                             <Description>
-                                Provide your tokens as liquidity in the stNEAR {"<->"} wNEAR pool and {""}
-                                put your LP Shares into the stNEAR {"<->"} wNEAR farm. {""}
+                                Provide your tokens as liquidity in the stNEAR {"<->"} wNEAR pool 
+                                {`${NEAR.isFarmActive ? " and put your LP Shares into the stNEAR <-> wNEAR farm." : ""}`}
                                 <LineSpacing />
                                 You currently have <Purple>{stNEARBalance}</Purple>&nbsp;$stNEAR and {""}
                                 <Purple>{wNEARBalance}</Purple>&nbsp;$wNEAR.
@@ -223,21 +225,21 @@ export function getContent(page: number): ReactNode | null {
                                 <Note>Execution might take a while.</Note>
                             </Description>
                         }
-                        denied={
-                            !wNEARInput ||
-                            !stNEARInput ||
-                            wNEARInput.data.error ||
-                            stNEARInput.data.error ||
-                            parseFloat(wNEARInput.data.unmatched) === 0 ||
-                            parseFloat(stNEARInput.data.unmatched) === 0
-                        }
-                        completed={refresh[1]}
-                        action={() => {
-                            NEAR.stepTwoAction({
-                                stnearAmount: utils.format.parseNearAmount(stNEARInput.data.value)!,
-                                wnearAmount: utils.format.parseNearAmount(wNEARInput.data.value)!
-                            })
-                        }}
+                        // denied={
+                        //     !wNEARInput ||
+                        //     !stNEARInput ||
+                        //     wNEARInput.data.error ||
+                        //     stNEARInput.data.error ||
+                        //     parseFloat(wNEARInput.data.unmatched) === 0 ||
+                        //     parseFloat(stNEARInput.data.unmatched) === 0
+                        // }
+                        // completed={refresh[1]}
+                        // action={() => {
+                        //     NEAR.stepTwoAction({
+                        //         stnearAmount: utils.format.parseNearAmount(stNEARInput.data.value)!,
+                        //         wnearAmount: utils.format.parseNearAmount(wNEARInput.data.value)!
+                        //     })
+                        // }}
                     />
                     <NavButtonComponent
                         next

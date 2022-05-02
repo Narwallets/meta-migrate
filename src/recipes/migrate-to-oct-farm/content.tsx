@@ -237,12 +237,14 @@ export function getContent(page: number): ReactNode | null {
                     NEAR.getNewPoolInfo(),
                     NEAR.getOctBalanceOnRef(),
                     NEAR.getStnearBalanceOnRef(),
-                    NEAR.getStnearBalance()
+                    NEAR.getStnearBalance(),
+                    NEAR.getIsFarmActive(NEAR.NEW_POOL_ID),
                 ]).then(res => {
                     NEAR.newPoolInfo = res[0]
                     NEAR.OCTBalanceOnRef = res[1]
                     NEAR.stNEARBalanceOnRef = res[2]
                     NEAR.stNEARBalance = res[3]
+                    NEAR.isFarmActive = res[4]
                     return false
                 })
             )
@@ -257,7 +259,7 @@ export function getContent(page: number): ReactNode | null {
                 <>
                     <TitleComponent title="Enter OCT <-> stNEAR" step={3} />
                     <StepComponent
-                        title={"Provide liquidity & farm."}
+                        title={`Provide liquidity ${NEAR.isFarmActive ? "& farm." : ""}`}
                         description={
                             <Description>
                                 <Break />
@@ -321,23 +323,23 @@ export function getContent(page: number): ReactNode | null {
                             parseFloat(stNEARInput.data.unmatched) === 0
                         }
                         completed={refresh[2]}
-                        // DEPRECATED
-                        action={() => {
-                            NEAR.addLiquidityAndStake(
-                                // (
-                                //     BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) -
-                                //     BigInt(NEAR.stNEARBalanceOnRef!)
-                                // ).toString(),
-                                BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!).toString(),
-                                [
-                                    utils.format.parseNearAmount(stNEARInput.data.value)!,
-                                    (
-                                        BigInt(utils.format.parseNearAmount(OCTInput.data.value)!) / BigInt("1000000")
-                                    ).toString()
-                                ],
-                                NEAR.lpSharesToStake!
-                            )
-                        }}
+                        // // DEPRECATED
+                        // action={() => {
+                        //     NEAR.addLiquidityAndStake(
+                        //         // (
+                        //         //     BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!) -
+                        //         //     BigInt(NEAR.stNEARBalanceOnRef!)
+                        //         // ).toString(),
+                        //         BigInt(utils.format.parseNearAmount(stNEARInput.data.value)!).toString(),
+                        //         [
+                        //             utils.format.parseNearAmount(stNEARInput.data.value)!,
+                        //             (
+                        //                 BigInt(utils.format.parseNearAmount(OCTInput.data.value)!) / BigInt("1000000")
+                        //             ).toString()
+                        //         ],
+                        //         NEAR.lpSharesToStake!
+                        //     )
+                        // }}
                     />
                     <NavButtonComponent
                         next
