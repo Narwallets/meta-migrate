@@ -167,13 +167,18 @@ export function getContent(page: number): ReactNode | null {
             const wNEARBalance = Loading(!!NEAR.wNEARBalance, NEAR.wNEARBalance, s => yton(s)!)
             return (
                 <>
-                    <TitleComponent title={`Enter stNEAR <-> wNEAR ${NEAR.isFarmActive ? "farm" : "liquidity pool"}`} step={2} />
+                    <TitleComponent
+                        title={`Enter stNEAR <-> wNEAR ${NEAR.isFarmActive ? "farm" : "liquidity pool"}`}
+                        step={2}
+                    />
                     <StepComponent
                         title={`Provide LP ${NEAR.isFarmActive ? "and stake." : ""}`}
                         description={
                             <Description>
-                                Provide your tokens as liquidity in the stNEAR {"<->"} wNEAR pool 
-                                {`${NEAR.isFarmActive ? " and put your LP Shares into the stNEAR <-> wNEAR farm." : ""}`}
+                                Provide your tokens as liquidity in the stNEAR {"<->"} wNEAR pool
+                                {`${
+                                    NEAR.isFarmActive ? " and put your LP Shares into the stNEAR <-> wNEAR farm." : ""
+                                }`}
                                 <LineSpacing />
                                 You currently have <Purple>{stNEARBalance}</Purple>&nbsp;$stNEAR and {""}
                                 <Purple>{wNEARBalance}</Purple>&nbsp;$wNEAR.
@@ -373,7 +378,7 @@ export function APY() {
         async function getPercentage() {
             let percentage = 0
             const isFarmActive = await NEAR.getIsFarmActive(NEAR.STNEAR_WNEAR_POOL_ID)
-            if(isFarmActive) {
+            if (isFarmActive) {
                 percentage = (await getFarmAPR())?.ref_wnear_st_near_apr
             }
             console.log("BABA", percentage)
@@ -394,5 +399,7 @@ export function APY() {
         console.log("P: ", percentage)
         console.log("P2: ", percentageStNear)
     }, [percentage, percentageStNear])
-    return <span>{percentage + percentageStNear !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
+    return (
+        <span>{percentage + percentageStNear !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
+    )
 }

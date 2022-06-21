@@ -746,18 +746,22 @@ export default class BaseLogic {
     }
 
     async getFarmRewardsTokens(farmId: number): Promise<FarmReward[]> {
-        const farmTokenRewards: FarmReward[] = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_FARMING, "list_farms_by_seed", {
-            seed_id: `v2.ref-finance.near@${farmId}`
-        })
+        const farmTokenRewards: FarmReward[] = await window.account.viewFunction(
+            window.nearConfig.ADDRESS_REF_FARMING,
+            "list_farms_by_seed",
+            {
+                seed_id: `v2.ref-finance.near@${farmId}`
+            }
+        )
 
         return farmTokenRewards
     }
 
     async getIsFarmActive(farmId: number): Promise<boolean> {
         const farmRewardTokens: FarmReward[] = await this.getFarmRewardsTokens(farmId)
-        for(let i = 0; i < farmRewardTokens.length; i++) {
+        for (let i = 0; i < farmRewardTokens.length; i++) {
             const farmRewardToken = farmRewardTokens[i]
-            if(farmRewardToken.farm_status != "Ended") {
+            if (farmRewardToken.farm_status != "Ended") {
                 return true
             }
         }
@@ -767,19 +771,18 @@ export default class BaseLogic {
 }
 
 interface FarmReward {
-    farm_id: string;
-    farm_kind: string;
-    farm_status: string;
-    seed_id: string;
-    reward_token: string;
-    start_at: number;
-    reward_per_session: string;
-    session_interval: number;
-    total_reward: string;
-    cur_round: number;
-    last_round: number;
-    claimed_reward: string;
-    unclaimed_reward: string;
-    beneficiary_reward: string;
-
+    farm_id: string
+    farm_kind: string
+    farm_status: string
+    seed_id: string
+    reward_token: string
+    start_at: number
+    reward_per_session: string
+    session_interval: number
+    total_reward: string
+    cur_round: number
+    last_round: number
+    claimed_reward: string
+    unclaimed_reward: string
+    beneficiary_reward: string
 }

@@ -238,7 +238,7 @@ export function getContent(page: number): ReactNode | null {
                     NEAR.getOctBalanceOnRef(),
                     NEAR.getStnearBalanceOnRef(),
                     NEAR.getStnearBalance(),
-                    NEAR.getIsFarmActive(NEAR.NEW_POOL_ID),
+                    NEAR.getIsFarmActive(NEAR.NEW_POOL_ID)
                 ]).then(res => {
                     NEAR.newPoolInfo = res[0]
                     NEAR.OCTBalanceOnRef = res[1]
@@ -500,7 +500,7 @@ export function APY() {
         async function getPercentage() {
             const isFarmActive = await NEAR.getIsFarmActive(NEAR.NEW_POOL_ID)
             let percentage = 0
-            if(isFarmActive) {
+            if (isFarmActive) {
                 percentage = (await getFarmAPR())?.ref_oct_st_near_apr
             }
             if (isNaN(percentage)) {
@@ -518,5 +518,7 @@ export function APY() {
         getPercentage()
         getPercentageStNear()
     }, [percentage, percentageStNear])
-    return <span>{percentage + percentageStNear !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
+    return (
+        <span>{percentage + percentageStNear !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
+    )
 }

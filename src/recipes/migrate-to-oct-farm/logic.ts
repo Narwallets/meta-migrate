@@ -229,10 +229,8 @@ export default class Logic extends BaseLogic {
 
     // action: LP to new pool and stake on farm
     async addLiquidityAndStake(amount_stnear: string, lp_amounts: string[], lp_shares_to_stake: string): Promise<void> {
-        let actions = [
-            this.addLiquidityToStnearOct(amount_stnear, lp_amounts),
-        ]
-        if(this.isFarmActive){
+        let actions = [this.addLiquidityToStnearOct(amount_stnear, lp_amounts)]
+        if (this.isFarmActive) {
             actions.push(this.farmStake(lp_shares_to_stake, this.NEW_POOL_ID))
         }
         this.passToWallet(actions)

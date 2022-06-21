@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Grid, Button, Icon, Box } from "@mui/material"
-import RecipesLogo from "../public/logo.svg"
+import RecipesLogo from "../public/logo.png"
 import { NavLink } from "react-router-dom"
 export default function Header() {
     return (

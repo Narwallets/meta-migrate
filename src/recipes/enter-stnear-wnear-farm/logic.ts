@@ -61,10 +61,10 @@ export default class Logic extends BaseLogic {
                 { token: window.nearConfig.ADDRESS_WNEAR, amount: wnearAmount }
             ]),
             // rovide liquidity to stNEAR<>wNEAR pool
-            this.addLiquidity([{ pool_id: this.STNEAR_WNEAR_POOL_ID, amounts: [stnearAmount, wnearAmount] }]),
+            this.addLiquidity([{ pool_id: this.STNEAR_WNEAR_POOL_ID, amounts: [stnearAmount, wnearAmount] }])
         ]
 
-        if(this.isFarmActive) {
+        if (this.isFarmActive) {
             // stake on farm
             actions.push(this.farmStake(lpShares, this.STNEAR_WNEAR_POOL_ID))
         }

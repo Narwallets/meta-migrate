@@ -13,6 +13,11 @@ body {
     background-image: url(bg.svg);
 }
 
+.logo {
+    width: 15%;
+    margin-left: -55px;
+}
+
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
