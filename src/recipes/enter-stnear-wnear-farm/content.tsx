@@ -381,7 +381,6 @@ export function APY() {
             if (isFarmActive) {
                 percentage = (await getFarmAPR())?.ref_wnear_st_near_apr
             }
-            console.log("BABA", percentage)
             if (isNaN(percentage)) {
                 percentage = 0
             }
@@ -396,8 +395,6 @@ export function APY() {
         }
         getPercentage()
         getPercentageStNear()
-        console.log("P: ", percentage)
-        console.log("P2: ", percentageStNear)
     }, [percentage, percentageStNear])
     return (
         <span>{percentage + percentageStNear !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>

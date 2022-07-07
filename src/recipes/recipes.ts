@@ -2,6 +2,7 @@ import { ReactNode } from "react"
 import * as MigrateToOCTFarm from "./migrate-to-oct-farm/content"
 import * as EnterStNEARMETAFarm from "./enter-stnear-meta-farm/content"
 import * as EnterStNEARWNEARFarm from "./enter-stnear-wnear-farm/content"
+import * as MigrateToStNearWNearStableFarm from "./migrate-stnear-wnear-stable-farm/content"
 
 type recipe = {
     id: number
@@ -23,7 +24,7 @@ const recipes: recipe[] = [
         apy: EnterStNEARMETAFarm.APY,
         content: EnterStNEARMETAFarm.getContent,
         steps: EnterStNEARMETAFarm.steps,
-        order: 3
+        order: 4
     },
     {
         id: 1,
@@ -41,6 +42,15 @@ const recipes: recipe[] = [
         apy: EnterStNEARWNEARFarm.APY,
         content: EnterStNEARWNEARFarm.getContent,
         steps: EnterStNEARWNEARFarm.steps,
+        order: 3
+    },
+    {
+        id: 3,
+        title: "Migrate stNEAR-wNEAR farm -> stNEAR-wNEAR stable farm",
+        description: "Migrate your liquidity in 3 easy steps!",
+        apy: MigrateToStNearWNearStableFarm.APY,
+        content: MigrateToStNearWNearStableFarm.getContent,
+        steps: MigrateToStNearWNearStableFarm.steps,
         order: 1
     }
 ]

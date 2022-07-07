@@ -8,7 +8,7 @@ import { useReducer } from "react"
 import WalletComponent from "./components/wallet"
 import BaseLogic from "./services/near"
 import { getPage, getRecipe } from "./utils/navigation"
-import { NavLink, Outlet, useParams } from "react-router-dom"
+import { Outlet, useParams } from "react-router-dom"
 import PageComponent from "./components/page"
 import { recipes, recipesSorted } from "./recipes/recipes"
 
@@ -144,7 +144,7 @@ export function RecipePage() {
                     <Paper
                         className={
                             "secondary-container-h" +
-                            (getPage() == recipes[parseInt(params.recipeId!)].steps.length - 1
+                            (getPage() === recipes[parseInt(params.recipeId!)].steps.length - 1
                                 ? " secondary-container-h-last"
                                 : "")
                         }
@@ -168,7 +168,7 @@ export function RecipePage() {
 
 export function CatalogPage() {
     const recipeId = getRecipe()
-    if (recipeId != "") {
+    if (recipeId !== "") {
         return <RecipePage />
     }
     return (

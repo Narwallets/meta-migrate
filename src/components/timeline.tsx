@@ -32,7 +32,7 @@ export default function TimelineComponent(props: { steps: string[] }) {
             position="left"
         >
             {props.steps.map((s, i) => (
-                <TimelineItem className={`timeline-item steps${props.steps.length}`} onClick={() => jumpTo(i)}>
+                <TimelineItem key={i} className={`timeline-item steps${props.steps.length}`} onClick={() => jumpTo(i)}>
                     <TimelineSeparator className="timeline-item-separator">
                         <TimelineDot className="timeline-item-dot" color={getColor(i)} />
                         {i < props.steps.length - 2 ? <TimelineConnector className="timeline-item-conector" /> : <></>}
@@ -40,12 +40,6 @@ export default function TimelineComponent(props: { steps: string[] }) {
                     <TimelineContent className="timeline-item-content">{s.toUpperCase()}</TimelineContent>
                 </TimelineItem>
             ))}
-            {/* <TimelineItem onClick={() => jumpTo(props.steps.length)}>
-                <TimelineSeparator>
-                    <TimelineDot color={getColor(props.steps.length)} />
-                </TimelineSeparator>
-                <TimelineContent className="timeline-item-content">LOCATE MY FUNDS</TimelineContent>
-            </TimelineItem> */}
         </Timeline>
     )
 }
