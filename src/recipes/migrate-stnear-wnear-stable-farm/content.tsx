@@ -45,13 +45,13 @@ export function getContent(page: number): ReactNode | null {
             ) as string[]
             return (
                 <>
-                    <TitleComponent title="Exit stNEAR <-> wNEAR" step={page+1} />
+                    <TitleComponent title="Exit stNEAR <-> wNEAR" step={page + 1} />
                     <StepComponent
                         title={"Unstake & remove liquidity."}
                         description={
                             <Description>
-                                Unstake your LP shares from the old stNEAR {"<->"} wNEAR farm and remove liquidity from the old stNEAR {" "}
-                                {"<->"} wNEAR pool to receive stNear and wNEAR tokens. 
+                                Unstake your LP shares from the old stNEAR {"<->"} wNEAR farm and remove liquidity from
+                                the old stNEAR {"<->"} wNEAR pool to receive stNear and wNEAR tokens.
                                 <LineSpacing />
                                 You have a total of {""}
                                 <Purple>{allShares}</Purple>&nbsp;LP&nbsp;shares
@@ -127,8 +127,7 @@ export function getContent(page: number): ReactNode | null {
                         {
                             test: (value: string) =>
                                 NEAR.wNEARBalanceOnRef !== undefined &&
-                                BigInt(utils.format.parseNearAmount(value) ?? "0") >
-                                    BigInt(NEAR.wNEARBalanceOnRef),
+                                BigInt(utils.format.parseNearAmount(value) ?? "0") > BigInt(NEAR.wNEARBalanceOnRef),
                             msg: () =>
                                 `Insufficient funds. You only have ${
                                     NEAR.wNEARBalanceOnRef !== undefined ? yton(NEAR.wNEARBalanceOnRef) : "..."
@@ -143,7 +142,6 @@ export function getContent(page: number): ReactNode | null {
                     [
                         utils.format.parseNearAmount(stNEARInput.data.error ? "0" : stNEARInput.data.value ?? "0")!,
                         utils.format.parseNearAmount(wNearInput.data.error ? "0" : wNearInput.data.value ?? "0")!
-                        
                     ]
                 )
             }
@@ -173,15 +171,14 @@ export function getContent(page: number): ReactNode | null {
                     : "..."
             return (
                 <>
-                    <TitleComponent title="Enter stable stNEAR <-> wNEAR" step={page+1} />
+                    <TitleComponent title="Enter stable stNEAR <-> wNEAR" step={page + 1} />
                     <StepComponent
                         title={`Provide liquidity ${NEAR.isFarmActive ? "& farm." : ""}`}
                         description={
                             <Description>
                                 <Break />
                                 You have {""}
-                                <Purple>{stNEARBalance}</Purple>&nbsp;$stNEAR
-                                 and {""}
+                                <Purple>{stNEARBalance}</Purple>&nbsp;$stNEAR and {""}
                                 <Purple>{wNearBalance}</Purple>&nbsp;$wNear.
                                 <Break />
                                 <InputComponent
@@ -196,7 +193,6 @@ export function getContent(page: number): ReactNode | null {
                                     }}
                                 />
                                 <Icon sx={{ alignSelf: "center" }}>link</Icon>
-                                
                                 <InputComponent
                                     data={wNearInput ?? new InputData({ value: "" })}
                                     label="amount"
@@ -210,8 +206,7 @@ export function getContent(page: number): ReactNode | null {
                                 />
                                 {/* <Break />
                                 {"\u2248"} <Purple>{inLPShares}</Purple>&nbsp;LP&nbsp;shares. */}
-                                <Break />
-                                * because it is a stable pool, you can deposit different amounts
+                                <Break />* because it is a stable pool, you can deposit different amounts
                             </Description>
                         }
                         completed={refresh[2]}
@@ -234,7 +229,8 @@ export function getContent(page: number): ReactNode | null {
                             (!wNearInput && !stNEARInput) ||
                             wNearInput.data.error ||
                             stNEARInput.data.error ||
-                            (parseFloat(wNearInput.data.unmatched) === 0 && parseFloat(stNEARInput.data.unmatched) === 0)
+                            (parseFloat(wNearInput.data.unmatched) === 0 &&
+                                parseFloat(stNEARInput.data.unmatched) === 0)
                         }
                     />
                 </>
@@ -342,30 +338,20 @@ export function getContent(page: number): ReactNode | null {
 
 export function APY() {
     const [percentage, setPercentage] = useState(0)
-    const [percentageStNear, setPercentageStNear] = useState(0)
     useEffect(() => {
         async function getPercentage() {
             const isFarmActive = await NEAR.getIsFarmActive(NEAR.NEW_POOL_ID)
             let percentage = 0
             if (isFarmActive) {
-                percentage = (await getFarmAPR())?.ref_oct_st_near_apr
+                percentage = (await getFarmAPR())?.ref_wnear_st_near_stable_apr
             }
             if (isNaN(percentage)) {
                 percentage = 0
             }
             setPercentage(percentage)
         }
-        async function getPercentageStNear() {
-            let percentage = (await getFarmAPR())?.st_near_30_day_apy
-            if (isNaN(percentage) || percentage === 0) {
-                percentage = 0
-            }
-            setPercentageStNear(percentage)
-        }
+
         getPercentage()
-        getPercentageStNear()
-    }, [percentage, percentageStNear])
-    return (
-        <span>{percentage + percentageStNear !== 0 ? Math.round(percentage + percentageStNear / 2) + "%" : "..."}</span>
-    )
+    }, [percentage])
+    return <span>{percentage}%</span>
 }

@@ -2,7 +2,7 @@ import * as nearAPI from "near-api-js"
 import BaseLogic from "../../services/near"
 
 export default class Logic extends BaseLogic {
-    OLD_POOL_ID = 535 // ['meta-pool.near', 'wrap.near'] 
+    OLD_POOL_ID = 535 // ['meta-pool.near', 'wrap.near']
     NEW_POOL_ID = 3514 // ["meta-pool.near","wrap.near"] stable
     ADDRESS_METAPOOL: string = window.nearConfig.ADDRESS_METAPOOL
     ADDRESS_WNEAR: string = window.nearConfig.ADDRESS_WNEAR

@@ -3,7 +3,6 @@ import * as React from "react"
 import { useReducer } from "react"
 import * as Recipes from "../recipes/recipes"
 
-
 export default function PageComponent(props: { recipe: number; page: number }) {
     const [, forceUpdate] = useReducer(x => x + 1, 0)
     window.updatePage = forceUpdate

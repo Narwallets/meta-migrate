@@ -89,7 +89,12 @@ export default class BaseLogic {
         }
     }
 
-    async exitOldPosition(staked_amount: string, user_total_shares: string, min_amounts: string[], unwrapWNear: boolean = true): Promise<void> {
+    async exitOldPosition(
+        staked_amount: string,
+        user_total_shares: string,
+        min_amounts: string[],
+        unwrapWNear: boolean = true
+    ): Promise<void> {
         const preTXs: Promise<nearAPI.transactions.Transaction[]>[] = []
 
         // if user has LP shares on farm, unstake them
@@ -100,7 +105,7 @@ export default class BaseLogic {
         preTXs.push(this.removeLiquidityOldStNearWnear(user_total_shares, min_amounts))
 
         // withdraw wNEAR from Ref and unwrap it
-        if(unwrapWNear) preTXs.push(this.wnearToNear(min_amounts[1]))
+        if (unwrapWNear) preTXs.push(this.wnearToNear(min_amounts[1]))
 
         const TXs = await Promise.all(preTXs)
 
@@ -675,18 +680,25 @@ export default class BaseLogic {
         return lp_shares_estimate
     }
 
-    calcLpSharesFromAmountsForStableStNearWNear(pool_total_shares: string, pool_amounts: string[], lp_amounts: string[]): string {
+    calcLpSharesFromAmountsForStableStNearWNear(
+        pool_total_shares: string,
+        pool_amounts: string[],
+        lp_amounts: string[]
+    ): string {
         // For human readable see: https://github.com/ref-finance/ref-contracts/blob/3c04fd20767ad7f1c383deee8e0a2b5ab47fbc18/ref-exchange/src/stable_swap/curve.md
         // For code see: https://github.com/ref-finance/ref-contracts/blob/3c04fd20767ad7f1c383deee8e0a2b5ab47fbc18/ref-exchange/src/stable_swap/math.rs#L185
         // Briefing: On stable pools, exists a value d, which uses an amplification factors that needs some initialization constants I can't find
         // The following constants array is and estimate mostly taken from ref that roughly gives a correct amount
         // It refers to how many lp shares give you one stnear/wnear. Stnear gives around 1.0919 and wNear gives 0.9919
         const constants = [1.092, 0.992]
-        let lp_shares_estimate: string = pool_amounts.reduce((prevValue, poolAmt, index) => {
-            // let currValue: bigint = (BigInt(pool_total_shares) * BigInt(lp_amounts[index])) / BigInt(poolAmt)
-            let currValue: bigint = BigInt(constants[index] * 10**9) * BigInt(lp_amounts[index]) / BigInt(10 ** 9)
-            return prevValue + currValue
-        }, BigInt(0)).toString()
+        let lp_shares_estimate: string = pool_amounts
+            .reduce((prevValue, poolAmt, index) => {
+                // let currValue: bigint = (BigInt(pool_total_shares) * BigInt(lp_amounts[index])) / BigInt(poolAmt)
+                let currValue: bigint =
+                    (BigInt(constants[index] * 10 ** 9) * BigInt(lp_amounts[index])) / BigInt(10 ** 9)
+                return prevValue + currValue
+            }, BigInt(0))
+            .toString()
 
         // set tolerance to 0.3%
         // !!! important leave at least 1 LP share to occupy storage
