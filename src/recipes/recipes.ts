@@ -3,6 +3,7 @@ import * as MigrateToOCTFarm from "./migrate-to-oct-farm/content"
 import * as EnterStNEARMETAFarm from "./enter-stnear-meta-farm/content"
 import * as EnterStNEARWNEARFarm from "./enter-stnear-wnear-farm/content"
 import * as MigrateToStNearWNearStableFarm from "./migrate-stnear-wnear-stable-farm/content"
+import * as EnterStNEARWNEARStableFarm from "./enter-stnear-wnear-farm-stable/content"
 
 type recipe = {
     id: number
@@ -13,6 +14,7 @@ type recipe = {
     content: (page: number) => ReactNode | null
     steps: string[]
     order: number
+    display: boolean | "disabled"
 }
 
 const recipes: recipe[] = [
@@ -24,7 +26,8 @@ const recipes: recipe[] = [
         apy: EnterStNEARMETAFarm.APY,
         content: EnterStNEARMETAFarm.getContent,
         steps: EnterStNEARMETAFarm.steps,
-        order: 4
+        order: 4,
+        display: false
     },
     {
         id: 1,
@@ -33,7 +36,8 @@ const recipes: recipe[] = [
         apy: MigrateToOCTFarm.APY,
         content: MigrateToOCTFarm.getContent,
         steps: MigrateToOCTFarm.steps,
-        order: 2
+        order: 2,
+        display: false
     },
     {
         id: 2,
@@ -42,7 +46,8 @@ const recipes: recipe[] = [
         apy: EnterStNEARWNEARFarm.APY,
         content: EnterStNEARWNEARFarm.getContent,
         steps: EnterStNEARWNEARFarm.steps,
-        order: 3
+        order: 3,
+        display: false
     },
     {
         id: 3,
@@ -51,14 +56,25 @@ const recipes: recipe[] = [
         apy: MigrateToStNearWNearStableFarm.APY,
         content: MigrateToStNearWNearStableFarm.getContent,
         steps: MigrateToStNearWNearStableFarm.steps,
-        order: 1
+        order: 1,
+        display: true
+    },
+    {
+        id: 4,
+        title: "Enter stNEAR-wNEAR stable farm",
+        description: "Two clicks to start farming!",
+        apy: EnterStNEARWNEARStableFarm.APY,
+        content: EnterStNEARWNEARStableFarm.getContent,
+        steps: EnterStNEARWNEARStableFarm.steps,
+        order: 2,
+        display: true
     }
 ]
 
 export let recipesSorted: recipe[] = []
 
 for (let recipe of recipes) {
-    recipesSorted.push(recipe)
+    if (recipe.display) recipesSorted.push(recipe)
 }
 
 recipesSorted.sort((r1: recipe, r2: recipe) => r1.order - r2.order)

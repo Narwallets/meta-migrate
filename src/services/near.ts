@@ -24,8 +24,8 @@ declare global {
 window.nearConfig = getConfig("mainnet")
 
 export default class BaseLogic {
-    OLD_POOL_ID = 47 // ['f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near', 'wrap.near']
-    NEW_POOL_ID = 1889 // ["meta-pool.near","f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near"]
+    OLD_POOL_ID = 535 // ['f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near', 'wrap.near']
+    NEW_POOL_ID = 3514 // ["meta-pool.near","f5cfbc74057c610c8ef151a439252680ac68c6dc.factory.bridge.near"]
     SIMPLE_POOL_SHARE_DECIMALS = 24
     FARM_STORAGE_BALANCE: string = nearAPI.utils.format.parseNearAmount("0.045") as string
     MIN_DEPOSIT_PER_TOKEN: string = nearAPI.utils.format.parseNearAmount("0.005") as string
@@ -313,6 +313,94 @@ export default class BaseLogic {
         }
 
         preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_EXCHANGE, refActions))
+        const TXs: nearAPI.transactions.Transaction[] = await Promise.all(preTXs)
+
+        return TXs
+    }
+
+    async addLiquidityToStnearWnearStable(
+        amount_stnear: string,
+        lp_amounts: string[],
+        lpSharesToStake: string
+    ): Promise<nearAPI.transactions.Transaction[]> {
+        const preTXs: Promise<nearAPI.transactions.Transaction>[] = []
+        const metapoolActions: nearAPI.transactions.Action[] = []
+        // use this to increase storage balance on ref before depositing stNEAR
+        const refActions_1: nearAPI.transactions.Action[] = []
+        const wNearActions: nearAPI.transactions.Action[] = []
+        // use this for actions related to LP
+        const refActions_2: nearAPI.transactions.Action[] = []
+        // Ref changed and doesn't hold more tokens. This function should
+        // stop receiving amount_stnear as parameter
+        amount_stnear = lp_amounts[0]
+        const amount_wnear = lp_amounts[1]
+
+        if (BigInt(amount_wnear) > BigInt("0")) {
+            wNearActions.push(
+                nearAPI.transactions.functionCall(
+                    "ft_transfer_call",
+                    {
+                        receiver_id: window.nearConfig.ADDRESS_REF_EXCHANGE,
+                        amount: amount_wnear,
+                        msg: ""
+                    },
+                    150_000_000_000_000,
+                    "1" // one yocto
+                )
+            )
+        }
+
+        // deposit stNEAR on ref-finance. Assumptions:
+        // 1- ref-finance contract already has storage deposit on stNEAR contract
+        // 2- stNEAR is on the ref-finance global token whitelist
+        if (BigInt(amount_stnear) > BigInt("0")) {
+            metapoolActions.push(
+                nearAPI.transactions.functionCall(
+                    "ft_transfer_call",
+                    {
+                        receiver_id: window.nearConfig.ADDRESS_REF_EXCHANGE,
+                        amount: amount_stnear,
+                        msg: ""
+                    },
+                    150_000_000_000_000,
+                    "1" // one yocto
+                )
+            )
+        }
+
+        // set slippage protection to 0.1%
+        // const min_lp_amounts: string[] = lp_amounts.map(amount => {
+        //     return ((BigInt(amount) * BigInt("995")) / BigInt("1000")).toString()
+        // })
+
+        const min_shares: string = lpSharesToStake
+
+        // add liquidity to $OCT <-> $stNEAR
+        // no need to check for storage as storage deposit
+        // is take from attached deposit for this action
+        refActions_2.push(
+            nearAPI.transactions.functionCall(
+                "add_stable_liquidity",
+                {
+                    pool_id: this.NEW_POOL_ID,
+                    amounts: lp_amounts,
+                    min_shares: min_shares
+                },
+                100_000_000_000_000,
+                this.LP_STORAGE_AMOUNT
+            )
+        )
+
+        if (refActions_1.length > 0) {
+            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_EXCHANGE, refActions_1))
+        }
+        if (wNearActions.length > 0) {
+            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_WNEAR, wNearActions))
+        }
+        if (metapoolActions.length > 0) {
+            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_METAPOOL, metapoolActions))
+        }
+        preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_EXCHANGE, refActions_2))
         const TXs: nearAPI.transactions.Transaction[] = await Promise.all(preTXs)
 
         return TXs
