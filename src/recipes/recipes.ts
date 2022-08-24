@@ -4,6 +4,7 @@ import * as EnterStNEARMETAFarm from "./enter-stnear-meta-farm/content"
 import * as EnterStNEARWNEARFarm from "./enter-stnear-wnear-farm/content"
 import * as MigrateToStNearWNearStableFarm from "./migrate-stnear-wnear-stable-farm/content"
 import * as EnterStNEARWNEARStableFarm from "./enter-stnear-wnear-farm-stable/content"
+import * as EnterStNEARWNEARV2StableFarm from "./enter-stnear-wnear-v2-farm-stable/content"
 
 type recipe = {
     id: number
@@ -57,7 +58,7 @@ const recipes: recipe[] = [
         content: MigrateToStNearWNearStableFarm.getContent,
         steps: MigrateToStNearWNearStableFarm.steps,
         order: 1,
-        display: true
+        display: false
     },
     {
         id: 4,
@@ -67,6 +68,16 @@ const recipes: recipe[] = [
         content: EnterStNEARWNEARStableFarm.getContent,
         steps: EnterStNEARWNEARStableFarm.steps,
         order: 2,
+        display: false
+    },
+    {
+        id: 5,
+        title: "Enter stNEAR-wNEAR v2 stable farm",
+        description: "Two clicks to start farming!",
+        apy: EnterStNEARWNEARV2StableFarm.APY,
+        content: EnterStNEARWNEARV2StableFarm.getContent,
+        steps: EnterStNEARWNEARV2StableFarm.steps,
+        order: 1,
         display: true
     }
 ]

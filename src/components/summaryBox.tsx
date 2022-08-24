@@ -11,7 +11,11 @@ export default function SummaryBox() {
     const [percentageStNear, setPercentageStNear] = useState(11)
 
     async function getMetapoolMetrics(): Promise<any> {
-        const narwalletsResponse: Response = await fetch("https://validators.narwallets.com/metrics_json")
+        const narwalletsResponse: Response = await fetch("https://validators.narwallets.com/metrics_json", {
+            headers: {
+                "Access-Control-Allow-Origin": window.location.href
+            }
+        })
         const jsonResponse = await narwalletsResponse.json()
         return jsonResponse
     }

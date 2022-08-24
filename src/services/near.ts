@@ -54,7 +54,7 @@ export default class BaseLogic {
     }
 
     // TEMP generalized
-    async getFarmingStake(pool_id: number): Promise<string> {
+    async getFarmingStake(pool_id: number | string): Promise<string> {
         const seeds: any = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_FARMING, "list_user_seeds", {
             account_id: window.account.accountId
         })
@@ -63,8 +63,25 @@ export default class BaseLogic {
             : "0"
     }
 
+    async getV2FarmingStake(pool_id: number | string): Promise<string> {
+        console.log()
+        const seeds: any = await window.account.viewFunction(
+            window.nearConfig.ADDRESS_REF_V2_FARMING,
+            "list_farmer_seeds",
+            {
+                farmer_id: window.account.accountId
+                // seed_id: `${window.nearConfig.ADDRESS_REF_V2_EXCHANGE}@${pool_id}`
+            }
+        )
+        console.log("Seeds", seeds)
+        console.log("Seeds", seeds[`${window.nearConfig.ADDRESS_REF_EXCHANGE}@${pool_id}`])
+        return seeds[`${window.nearConfig.ADDRESS_REF_EXCHANGE}@${pool_id}`]
+            ? seeds[`${window.nearConfig.ADDRESS_REF_EXCHANGE}@${pool_id}`].free_amount
+            : "0"
+    }
+
     // TEMP generalized
-    async getPosition(poolID: number): Promise<{
+    async getPosition(poolID: string | number): Promise<{
         user_total_shares: string
         user_farm_shares: string
         user_lp_shares: string
@@ -122,13 +139,13 @@ export default class BaseLogic {
      * @param poolID liquidity pool whose shares will be staked
      * @returns
      */
-    async farmStake(amount: string, poolID: number): Promise<nearAPI.transactions.Transaction[]> {
+    async farmStakeV2(amount: string, poolID: number | string): Promise<nearAPI.transactions.Transaction[]> {
         const preTXs: Promise<nearAPI.transactions.Transaction>[] = []
         const storageActions: nearAPI.transactions.Action[] = []
         const stakingActions: nearAPI.transactions.Action[] = []
 
         const storage_balance: any = await window.account.viewFunction(
-            window.nearConfig.ADDRESS_REF_FARMING,
+            window.nearConfig.ADDRESS_REF_V2_FARMING,
             "storage_balance_of",
             {
                 account_id: window.account.accountId
@@ -137,8 +154,8 @@ export default class BaseLogic {
 
         if (
             !storage_balance ||
-            BigInt(storage_balance?.available ?? "0") < BigInt(this.FARM_STORAGE_BALANCE) ||
-            BigInt(storage_balance?.available ?? "0") < BigInt(this.MIN_DEPOSIT_PER_TOKEN)
+            BigInt(storage_balance?.total ?? "0") < BigInt(this.FARM_STORAGE_BALANCE) ||
+            BigInt(storage_balance?.total ?? "0") < BigInt(this.MIN_DEPOSIT_PER_TOKEN)
         ) {
             storageActions.push(
                 nearAPI.transactions.functionCall(
@@ -154,10 +171,10 @@ export default class BaseLogic {
             nearAPI.transactions.functionCall(
                 "mft_transfer_call",
                 {
-                    receiver_id: window.nearConfig.ADDRESS_REF_FARMING,
+                    receiver_id: window.nearConfig.ADDRESS_REF_V2_FARMING,
                     token_id: `:${poolID}`,
                     amount: amount,
-                    msg: ""
+                    msg: "\"Free\""
                 },
                 180_000_000_000_000,
                 "1" // one yocto
@@ -166,7 +183,7 @@ export default class BaseLogic {
 
         // only add storage transaction if needed
         if (storageActions.length > 0) {
-            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_FARMING, storageActions))
+            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_V2_FARMING, storageActions))
         }
 
         preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_EXCHANGE, stakingActions))
@@ -241,7 +258,7 @@ export default class BaseLogic {
     // 3- new values arrive
     // 4- wallet re-direct arrives
     // => user will approve new values thinking he'll get the old values
-    async getPoolInfo(poolID: number): Promise<{
+    async getPoolInfo(poolID: string | number): Promise<{
         user_shares: string
         total_shares: string
         pool_amounts: string[]
@@ -251,10 +268,11 @@ export default class BaseLogic {
             window.nearConfig.ADDRESS_REF_EXCHANGE,
             "get_pool_shares",
             {
-                pool_id: poolID,
+                pool_id: Number(poolID),
                 account_id: window.account.accountId
             }
         )
+        // const user_shares = "0"
 
         // get pool info
         const {
@@ -264,7 +282,7 @@ export default class BaseLogic {
             amounts: string[]
             shares_total_supply: string
         } = await window.account.viewFunction(window.nearConfig.ADDRESS_REF_EXCHANGE, "get_pool", {
-            pool_id: poolID
+            pool_id: Number(poolID)
         })
 
         return { user_shares, total_shares, pool_amounts: amounts }
@@ -384,6 +402,97 @@ export default class BaseLogic {
                 {
                     pool_id: this.NEW_POOL_ID,
                     amounts: lp_amounts,
+                    min_shares: min_shares
+                },
+                100_000_000_000_000,
+                this.LP_STORAGE_AMOUNT
+            )
+        )
+
+        if (refActions_1.length > 0) {
+            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_EXCHANGE, refActions_1))
+        }
+        if (wNearActions.length > 0) {
+            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_WNEAR, wNearActions))
+        }
+        if (metapoolActions.length > 0) {
+            preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_METAPOOL, metapoolActions))
+        }
+        preTXs.push(this.makeTransaction(window.nearConfig.ADDRESS_REF_EXCHANGE, refActions_2))
+        const TXs: nearAPI.transactions.Transaction[] = await Promise.all(preTXs)
+
+        return TXs
+    }
+
+    async addLiquidityToStnearWnearStableV2(
+        amount_stnear: string,
+        amount_near: string,
+        estimated_lp_shares: string
+    ): Promise<nearAPI.transactions.Transaction[]> {
+        const preTXs: Promise<nearAPI.transactions.Transaction>[] = []
+        const metapoolActions: nearAPI.transactions.Action[] = []
+        // use this to increase storage balance on ref before depositing stNEAR
+        const refActions_1: nearAPI.transactions.Action[] = []
+        const wNearActions: nearAPI.transactions.Action[] = []
+        // use this for actions related to LP
+        const refActions_2: nearAPI.transactions.Action[] = []
+        // Ref changed and doesn't hold more tokens. This function should
+        // stop receiving amount_stnear as parameter
+
+        if (BigInt(amount_near) > BigInt("0")) {
+            wNearActions.push(
+                nearAPI.transactions.functionCall(
+                    "near_deposit",
+                    {},
+                    150_000_000_000_000,
+                    amount_near // one yocto
+                )
+            )
+
+            wNearActions.push(
+                nearAPI.transactions.functionCall(
+                    "ft_transfer_call",
+                    {
+                        receiver_id: window.nearConfig.ADDRESS_REF_EXCHANGE,
+                        amount: amount_near,
+                        msg: ""
+                    },
+                    150_000_000_000_000,
+                    "1" // one yocto
+                )
+            )
+        }
+
+        // deposit stNEAR on ref-finance. Assumptions:
+        // 1- ref-finance contract already has storage deposit on stNEAR contract
+        // 2- stNEAR is on the ref-finance global token whitelist
+        if (BigInt(amount_stnear) > BigInt("0")) {
+            metapoolActions.push(
+                nearAPI.transactions.functionCall(
+                    "ft_transfer_call",
+                    {
+                        receiver_id: window.nearConfig.ADDRESS_REF_EXCHANGE,
+                        amount: amount_stnear,
+                        msg: ""
+                    },
+                    150_000_000_000_000,
+                    "1" // one yocto
+                )
+            )
+        }
+
+        // set slippage protection to 0.1%
+        const min_shares: string = ((BigInt(estimated_lp_shares) * BigInt("995")) / BigInt("1000")).toString()
+
+        // add liquidity to $OCT <-> $stNEAR
+        // no need to check for storage as storage deposit
+        // is take from attached deposit for this action
+        refActions_2.push(
+            nearAPI.transactions.functionCall(
+                "add_stable_liquidity",
+                {
+                    pool_id: this.NEW_POOL_ID,
+                    amounts: [amount_stnear, amount_near],
                     min_shares: min_shares
                 },
                 100_000_000_000_000,
@@ -768,7 +877,7 @@ export default class BaseLogic {
         return lp_shares_estimate
     }
 
-    calcLpSharesFromAmountsForStableStNearWNear(
+    calcLpSharesFromAmountsForStableStNearNear(
         pool_total_shares: string,
         pool_amounts: string[],
         lp_amounts: string[]
@@ -778,7 +887,7 @@ export default class BaseLogic {
         // Briefing: On stable pools, exists a value d, which uses an amplification factors that needs some initialization constants I can't find
         // The following constants array is and estimate mostly taken from ref that roughly gives a correct amount
         // It refers to how many lp shares give you one stnear/wnear. Stnear gives around 1.0919 and wNear gives 0.9919
-        const constants = [1.092, 0.992]
+        const constants = [1.093, 0.985]
         let lp_shares_estimate: string = pool_amounts
             .reduce((prevValue, poolAmt, index) => {
                 // let currValue: bigint = (BigInt(pool_total_shares) * BigInt(lp_amounts[index])) / BigInt(poolAmt)
@@ -866,10 +975,10 @@ export default class BaseLogic {
         })
     }
 
-    async getFarmRewardsTokens(farmId: number): Promise<FarmReward[]> {
+    async getFarmRewardsTokens(farmId: number | string): Promise<FarmReward[]> {
         const farmTokenRewards: FarmReward[] = await window.account.viewFunction(
-            window.nearConfig.ADDRESS_REF_FARMING,
-            "list_farms_by_seed",
+            window.nearConfig.ADDRESS_REF_V2_FARMING,
+            "list_seed_farms",
             {
                 seed_id: `v2.ref-finance.near@${farmId}`
             }
@@ -878,11 +987,11 @@ export default class BaseLogic {
         return farmTokenRewards
     }
 
-    async getIsFarmActive(farmId: number): Promise<boolean> {
+    async getIsFarmActive(farmId: number | string): Promise<boolean> {
         const farmRewardTokens: FarmReward[] = await this.getFarmRewardsTokens(farmId)
         for (let i = 0; i < farmRewardTokens.length; i++) {
             const farmRewardToken = farmRewardTokens[i]
-            if (farmRewardToken.farm_status != "Ended") {
+            if (farmRewardToken.farm_status !== "Ended") {
                 return true
             }
         }

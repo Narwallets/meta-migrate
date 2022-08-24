@@ -66,7 +66,7 @@ export default class Logic extends BaseLogic {
 
         if (this.isFarmActive) {
             // stake on farm
-            actions.push(this.farmStake(lpShares, this.STNEAR_WNEAR_POOL_ID))
+            actions.push(this.farmStakeV2(lpShares, this.STNEAR_WNEAR_POOL_ID))
         }
 
         this.passToWallet(actions)

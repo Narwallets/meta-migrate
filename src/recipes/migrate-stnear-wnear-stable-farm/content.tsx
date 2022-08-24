@@ -136,7 +136,7 @@ export function getContent(page: number): ReactNode | null {
                     ]
                 })
 
-                NEAR.lpSharesToStake = NEAR.calcLpSharesFromAmountsForStableStNearWNear(
+                NEAR.lpSharesToStake = NEAR.calcLpSharesFromAmountsForStableStNearNear(
                     NEAR.newPoolInfo.total_shares,
                     NEAR.newPoolInfo.amounts,
                     [
