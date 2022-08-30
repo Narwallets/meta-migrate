@@ -1,5 +1,5 @@
 {
-    "homepage": "https://metapool.app/dapp/mainnet/meta-recipes/",
+    "homepage": "https://metapool.app/dapp/testnet/meta-recipes/",
     "name": "meta-migrate",
     "version": "0.1.0",
     "private": true,

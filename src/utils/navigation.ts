@@ -36,5 +36,5 @@ window.onload = () => {
     //     parseInt(page) + (!url.searchParams.has("errorCode") && url.searchParams.has("transactionHashes") ? 1 : 0)
     window.history.replaceState(null, "", window.location.href.split("?")[0])
     jumpToRecipePage(recipe, page)
-    window.updateApp()
+    if (window.updateApp) window.updateApp()
 }

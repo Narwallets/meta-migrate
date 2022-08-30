@@ -84,10 +84,11 @@ export default class Logic extends BaseLogic {
         // fetch metapool info and stNEAR<>wNEAR pool info
         // const { total_shares, pool_amounts } = await this.getPoolInfo(this.STNEAR_WNEAR_STABLE_POOL_ID)
         // estimate received LP shares
-        const lpShares: string = this.calcLpSharesFromAmountsForStableStNearNear("0", ["1", "1"], [
-            stnearAmount,
-            nearAmount
-        ])
+        const lpShares: string = this.calcLpSharesFromAmountsForStableStNearNear(
+            "0",
+            ["1", "1"],
+            [stnearAmount, nearAmount]
+        )
 
         let actions = [
             // deposit both tokens on ref-finance

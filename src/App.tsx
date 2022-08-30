@@ -185,8 +185,9 @@ export function CatalogPage() {
             alignItems="center"
             wrap="nowrap"
         >
-            {recipesSorted.map(r => (
+            {recipesSorted.map((r, i) => (
                 <Paper
+                    key={i}
                     className="recipe-container"
                     sx={{
                         width: 0.6,

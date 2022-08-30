@@ -174,7 +174,7 @@ export default class BaseLogic {
                     receiver_id: window.nearConfig.ADDRESS_REF_V2_FARMING,
                     token_id: `:${poolID}`,
                     amount: amount,
-                    msg: "\"Free\""
+                    msg: '"Free"'
                 },
                 180_000_000_000_000,
                 "1" // one yocto

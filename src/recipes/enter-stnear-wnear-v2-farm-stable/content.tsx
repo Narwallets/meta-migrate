@@ -34,7 +34,7 @@ export function getContent(page: number): ReactNode | null {
                             test: (value: string) =>
                                 NEAR.minDepositAmount !== undefined &&
                                 BigInt(utils.format.parseNearAmount(value) ?? "0") <
-                                    BigInt(1) * BigInt(NEAR.minDepositAmount) / BigInt(10),
+                                    (BigInt(1) * BigInt(NEAR.minDepositAmount)) / BigInt(10),
                             msg: () =>
                                 `This recipe requires a minimum of ${yton(
                                     (BigInt(1) * BigInt(NEAR.minDepositAmount!)).toString(),
@@ -58,7 +58,7 @@ export function getContent(page: number): ReactNode | null {
                     Promise.all([NEAR.getMetapoolInfo(), NEAR.getNativeNearBalance()]).then(res => {
                         NEAR.minDepositAmount = res[0].min_deposit_amount
                         NEAR.nativeNEARBalance = res[1]
-                        return BigInt(NEAR.nativeNEARBalance) < BigInt(1) * BigInt(NEAR.minDepositAmount) / BigInt(10)
+                        return BigInt(NEAR.nativeNEARBalance) < (BigInt(1) * BigInt(NEAR.minDepositAmount)) / BigInt(10)
                     }),
                 0
             )
